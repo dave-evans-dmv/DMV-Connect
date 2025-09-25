@@ -12,6 +12,8 @@ namespace DMV_Connect.Controllers
         private readonly ILogger<HomeController> _logger;
         private readonly AppDbContext _context;
 
+        private int loggedInUserId = 2;
+
         public HomeController(ILogger<HomeController> logger, AppDbContext context)
         {
             _logger = logger;
@@ -20,13 +22,12 @@ namespace DMV_Connect.Controllers
 
         public async Task<IActionResult> Index()
         {
-            int loggedInUserId = 2;
-
             var allPosts = await _context.Posts
                 .Where(n => !n.isPrivate || n.UserId == loggedInUserId)
                 .Include(n => n.User)
                 .Include(l => l.Likes)
-                .Include(c => c.Comments)
+                .Include(c => c.Comments).ThenInclude(n => n.User)
+                .Include(r => r.Reports)
                 .Include(f => f.Favorites)
                 .OrderByDescending(n => n.DateCreated)
                 .ToListAsync();
@@ -37,9 +38,6 @@ namespace DMV_Connect.Controllers
         [HttpPost]
         public async Task<IActionResult> CreatePost(PostVM post)
         {
-            // Get Logged in user
-            int loggedInUser = 2;
-
             //Create new post
             var newPost = new Post
             {
@@ -48,7 +46,7 @@ namespace DMV_Connect.Controllers
                 DateUpdated = DateTime.Now,
                 ImageUrl = "",
                 NrOfReports = 0,
-                UserId = loggedInUser
+                UserId = loggedInUserId
             };
 
             // Check and save image
@@ -80,8 +78,6 @@ namespace DMV_Connect.Controllers
         [HttpPost]
         public async Task<IActionResult> TogglePostLike(PostLikeVM postLikeVM)
         {
-            int loggedInUserId = 2;
-
             // Check if user has already liked the post
             var like = await _context.Likes
                 .Where(l => l.PostId == postLikeVM.PostId && l.UserId == loggedInUserId)
@@ -109,8 +105,6 @@ namespace DMV_Connect.Controllers
         [HttpPost]
         public async Task<IActionResult> TogglePostFavorite(PostFavoriteVM postFavoriteVM)
         {
-            int loggedInUserId = 2;
-
             // Check if user has already favorited the post
             var favorite = await _context.Favorites
                 .Where(l => l.PostId == postFavoriteVM.PostId && l.UserId == loggedInUserId)
@@ -138,8 +132,6 @@ namespace DMV_Connect.Controllers
         [HttpPost]
         public async Task<IActionResult> TogglePostVisibility(PostVisibilityVM postVisibilityVM)
         {
-            int loggedInUserId = 2;
-
             var post = await _context.Posts
                 .FirstOrDefaultAsync(l => l.Id == postVisibilityVM.PostId && l.UserId == loggedInUserId);
 
@@ -156,8 +148,6 @@ namespace DMV_Connect.Controllers
         [HttpPost]
         public async Task<IActionResult> AddPostComment(PostCommentVM postCommentVM)
         {
-            int loggedInUserId = 2;
-
             var newComment = new Comment()
             {
                 PostId = postCommentVM.PostId,
@@ -168,6 +158,32 @@ namespace DMV_Connect.Controllers
             };
 
             await _context.Comments.AddAsync(newComment);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddPostReport(PostReportVM postReportVM)
+        {
+            var newReport = new Report()
+            {
+                PostId = postReportVM.PostId,
+                UserId = loggedInUserId,
+                DateCreated = DateTime.Now
+            };
+
+            await _context.Reports.AddAsync(newReport);
+
+            var post = await _context.Posts
+                .FirstOrDefaultAsync(l => l.Id == postReportVM.PostId);
+
+            if (post != null)
+            {
+                post.NrOfReports++;
+                _context.Posts.Update(post);
+            }
+
             await _context.SaveChangesAsync();
 
             return RedirectToAction("Index");
@@ -187,5 +203,27 @@ namespace DMV_Connect.Controllers
             return RedirectToAction("Index");
         }
 
+        [HttpPost]
+        public async Task<IActionResult> DeletePost(PostDeleteVM postDeleteVM)
+        {
+            var post = await _context.Posts
+                .Include(n => n.Likes)
+                .Include(n => n.Favorites)
+                .Include(n => n.Comments)
+                .Include(n => n.Reports)
+                .FirstOrDefaultAsync(c => c.Id == postDeleteVM.PostId);
+            
+            if (post != null)
+            {
+                _context.Likes.RemoveRange(post.Likes);
+                _context.Favorites.RemoveRange(post.Favorites);
+                _context.Comments.RemoveRange(post.Comments);
+                _context.Reports.RemoveRange(post.Reports);
+
+                _context.Posts.Remove(post);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("Index");
+        }
     }
 }
