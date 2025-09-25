@@ -1,0 +1,177 @@
+﻿@model Post
+
+@{
+    TimeSpan timeSpanSincePosted = DateTime.Now.Subtract(Model.DateCreated);
+
+    string displayTime = timeSpanSincePosted switch
+    {
+        var t when t.TotalDays >= 730 => $"{(int)t.TotalDays / 365} years ago",
+        var t when t.TotalDays >= 365 && t.TotalDays < 730 => $"{(int)t.TotalDays / 365} year ago",
+        var t when t.TotalDays >= 58 && t.TotalDays <= 365 => $"{(int)t.TotalDays / 29} months ago",
+        var t when t.TotalDays >= 29 && t.TotalDays <= 57 => $"{(int)t.TotalDays / 29} month ago",
+        var t when t.TotalDays >= 14 && t.TotalDays <= 28 => $"{(int)t.TotalDays / 7} weeks ago",
+        var t when t.TotalDays >= 7 && t.TotalDays <= 13 => $"{(int)t.TotalDays / 7} week ago",
+        var t when t.TotalDays >= 2 && t.TotalDays < 7 => $"{(int)t.TotalDays} days ago",
+        var t when t.TotalDays >= 1 && t.TotalDays < 2 => $"{(int)t.TotalDays} day ago",
+        var t when t.TotalHours >= 2 && t.TotalHours < 24 => $"{(int)t.TotalHours} hours ago",
+        var t when t.TotalHours >= 1 && t.TotalHours < 2 => $"{(int)t.TotalHours} hour ago",
+        var t when t.TotalMinutes >= 2 && t.TotalMinutes < 59 => $"{(int)t.TotalMinutes} minutes ago",
+        var t when t.TotalMinutes >= 1 && t.TotalMinutes < 2 => $"{(int)t.TotalMinutes} minute ago",
+        var t when t.TotalMinutes < 1 => $"Just now",
+        _ => Model.DateCreated.ToString("M/dd/yyyy hh:mm tt")
+    };
+
+    bool isLiked = @Model.Likes.Any(n => n.UserId == 2);
+}
+
+<div class="bg-white rounded-xl shadow-sm text-sm font-medium border1">
+    @* Post Heading *@
+    <div class="flex gap-3 sm:p-4 p-2.5 text-sm font-medium">
+        <a>
+            <img src="@(Model.User.ProfilePictureUrl ?? "~/images/user-profile.svg")" class="w-9 h-9 rounded-full" />
+        </a>
+        <div class="flex-1">
+            <a>
+                <h4 class="!text-black">@Model.User.FullName</h4>
+                <div class="text-xs !text-black" title="@Model.DateCreated.ToString("M/dd/yyyy hh:mm tt")">@displayTime</div>
+            </a>
+        </div>
+        <div class="-mr-1">
+            <button type="button" class="button-icon w-8 w-8">
+                <ion-icon class="text-xl placeholder:!text-black !text-black" name="ellipsis-horizontal"></ion-icon>
+            </button>
+            <div class="w-[245px]" uk-dropdown="pos: bottom-right; animation: uk-animation-scale-up uk-transform-origin-top-right; animate-out: truemode: click">
+                <form>
+                    <button type="submit" class="hover\:bg-red-50 icon-link">
+                        <ion-icon class="text-xl shrink-0" name="flag-outline"></ion-icon> Report
+                    </button>
+                </form>
+                <hr />
+                <form>
+                    <button type="submit" class="hover\:bg-red-50 icon-link">
+                        <ion-icon class="text-xl" name="lock-closed-outline"></ion-icon> Set as private
+                    </button>
+                </form>
+                <hr />
+                <form>
+                    <button type="submit" class="hover\:bg-red-50 icon-link">
+                        <ion-icon class="text-xl" name="trash-bin-outline"></ion-icon> Delete post
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    @* Post Content *@
+    <a>
+        <div class="sm:px-4 p-2.5 pt-0 w-full">
+            <p class="font-normal !text-black">
+                @Model.Content
+            </p>
+        </div>
+    </a>
+    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+    {
+        <a>
+            <div class="relative w-full lg:h-96 h-full sm:-x-4 p-2">
+                <img alt="@Model.Content" src="@Model.ImageUrl" class="sm:rounded-lg w-full h-full object-cover" />
+            </div>
+        </a>
+    }
+    @* Icons *@
+    <div class="sm:p-4 p-2.5 flex items-center gap-4 text-xs font-semibold">
+        <div class="flex items-center gap-2.5 ">
+            <form asp-controller="Home" asp-action="TogglePostLike">
+                <input type="hidden" name="postId" value="@Model.Id" />
+                <button type="submit" class="button-icon like-button @(isLiked ? " text-red-500 bg-red-100" : "text-black")">
+                    <ion-icon class="text-lg" name="@(isLiked ? "heart" : "heart-outline")"></ion-icon>
+                </button>
+            </form>
+            <a href="#" class="!text-black">@Model.Likes.Count</a>
+        </div>
+        <div class="flex items-center gap-3 !text-black">
+            <a class="button-icon text-black">
+                <ion-icon class="text-lg" name="chatbubble-ellipses-outline"></ion-icon>
+            </a>
+            <a href="#" class="!text-black">@Model.Comments.Count</a>
+        </div>
+        <div class="ml-auto"></div>
+        <div class="flex-items-center gap-2">
+            <form>
+                <button type="submit" class="button-icon favorite-button ml-auto text-orange-500 bt-orange-100">
+                    <ion-icon class="text-lg" name="bookmark-outline"></ion-icon>
+                </button>
+            </form>
+            <a href="#" class="!text-black">2</a>
+        </div>
+    </div>
+    @* Comments *@
+    <div>
+        <div class="p-2.5 border-t border-gray-100 font-normal space-y-3 relative">
+            @foreach(var comment in Model.Comments)
+            {
+                TimeSpan timeSpanSinceComment = DateTime.Now.Subtract(comment.DateCreated);
+                string displayCommentTime = timeSpanSinceComment switch
+                {
+                    var t when t.TotalDays >= 730 => $"{(int)t.TotalDays / 365} years ago",
+                    var t when t.TotalDays >= 365 && t.TotalDays < 730 => $"{(int)t.TotalDays / 365} year ago",
+                    var t when t.TotalDays >= 58 && t.TotalDays <= 365 => $"{(int)t.TotalDays / 29} months ago",
+                    var t when t.TotalDays >= 29 && t.TotalDays <= 57 => $"{(int)t.TotalDays / 29} month ago",
+                    var t when t.TotalDays >= 14 && t.TotalDays <= 28 => $"{(int)t.TotalDays / 7} weeks ago",
+                    var t when t.TotalDays >= 7 && t.TotalDays <= 13 => $"{(int)t.TotalDays / 7} week ago",
+                    var t when t.TotalDays >= 2 && t.TotalDays < 7 => $"{(int)t.TotalDays} days ago",
+                    var t when t.TotalDays >= 1 && t.TotalDays < 2 => $"{(int)t.TotalDays} day ago",
+                    var t when t.TotalHours >= 2 && t.TotalHours < 24 => $"{(int)t.TotalHours} hours ago",
+                    var t when t.TotalHours >= 1 && t.TotalHours < 2 => $"{(int)t.TotalHours} hour ago",
+                    var t when t.TotalMinutes >= 2 && t.TotalMinutes < 59 => $"{(int)t.TotalMinutes} minutes ago",
+                    var t when t.TotalMinutes >= 1 && t.TotalMinutes < 2 => $"{(int)t.TotalMinutes} minute ago",
+                    var t when t.TotalMinutes < 1 => $"Just now",
+                    _ => Model.DateCreated.ToString("M/dd/yyyy hh:mm tt")
+                };
+
+                <div class="flex items-styart gap-3 relative">
+                    <a>
+                        <img src="@(comment.User.ProfilePictureUrl ?? "~/images/user-profile.svg")" class="w-6 h-6 mt-1 rounded-full" />
+                    </a>
+                    <div class="flex-1">
+                        <div class="flex justify-content-between">
+                            <a class="text-black font-medium inline-block flex-grow">
+                                @comment.User.FullName
+                            </a>
+                            <small class="!text-black">@displayCommentTime</small>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <p class="mt-0.5 !text-black">
+                                @comment.Content
+                            </p>
+                            <form class="remove-comment-form">
+                                <button type="submit" class="text-red-500 text-xs ml-2" title="Remove post comment">
+                                    <ion-icon name="trash-outline"></ion-icon>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            }
+            @if (Model.Comments.Count >= 3)
+            {
+                <div class="p-1.5">
+                    <a class="!text-black">
+                        Show all comments
+                    </a>
+                </div>
+            }
+        </div>
+        <form class="add-comment-form" asp-controller="Home" asp-action="AddPostComment">
+            <input type="hidden" name="postId" value="@Model.Id" />
+            <div class="sm:px-4 sm:py-3 border-t border-gray-100 flex items-center gap-1">
+                <a>
+                    <img src="~/images/user-profile.svg" class="w-6 h-6 rounded-full" />
+                </a>
+                <div class="flex-1 relative overflow-hidden h-10">
+                    <textarea name="content" placeholder="Add Comment..." rows="1" class="w-full resize-none px-4 py-2 focus:!border-transparent focus:!ring-transparent !text-white"></textarea>
+                </div>
+                <button type="submit" class="!text-black text-sm-rounded-full py-1.5 px-3.5 bg-secondary">Comment</button>
+            </div>
+        </form>
+    </div>
+</div>
