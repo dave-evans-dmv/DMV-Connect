@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36511.14 d17.14
+VisualStudioVersion = 17.14.36511.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DMV Connect", "DMV Connect.csproj", "{B4C473FD-63CA-4414-B187-A953576ECF5A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DMVConnect", "DMVConnect.csproj", "{B4C473FD-63CA-4414-B187-A953576ECF5A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DMVConnect.Data", "..\DMVConnect.Data\DMVConnect.Data.csproj", "{264026A1-1817-4128-8E0F-0A64DC20A3D3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{B4C473FD-63CA-4414-B187-A953576ECF5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B4C473FD-63CA-4414-B187-A953576ECF5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B4C473FD-63CA-4414-B187-A953576ECF5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{264026A1-1817-4128-8E0F-0A64DC20A3D3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{264026A1-1817-4128-8E0F-0A64DC20A3D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{264026A1-1817-4128-8E0F-0A64DC20A3D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{264026A1-1817-4128-8E0F-0A64DC20A3D3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

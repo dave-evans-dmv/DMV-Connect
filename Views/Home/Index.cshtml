@@ -1,4 +1,6 @@
-﻿<main id="site__main" class="2xl:ml-[--w-side] xl:ml-[--w-side-sm] p-2.5 h-[calc(100vh-var(--m-top))] mt-[--m-top]">
+﻿@model List<Post>
+
+<main id="site__main" class="2xl:ml-[--w-side] xl:ml-[--w-side-sm] p-2.5 h-[calc(100vh-var(--m-top))] mt-[--m-top]">
     <div id="js-oversized" class="lg:flex 2xl:gap-16 gap-12 max-w-[1065px] mx-auto">
         <div class="max-w-[680px] mx-auto">
             @* Stories *@
@@ -57,126 +59,16 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="bg-white !text-black rounded-xl shadow-sm md:p-4 p-2 space-y-4 text-sm font-medium border1" style="width: 580px">
-                    Currently, there are no posts available. Would you like to create the first one?
-                </div>
-                <div class="bg-white rounded-xl shadow-sm text-sm font-medium border1">
-                    @* Post Heading *@
-                    <div class="flex gap-3 sm:p-4 p-2.5 text-sm font-medium">
-                        <a>
-                            <img src="~/images/user-profile.svg" class="w-9 h-9 rounded-full" />
-                        </a>
-                        <div class="flex-1">
-                            <a>
-                                <h4 class="!text-black">Tester McTestface</h4>
-                                <div class="text-xs !text-black">1 day ago</div>
-                            </a>
-                        </div>
-                        <div class="-mr-1">
-                            <button type="button" class="button-icon w-8 w-8">
-                                <ion-icon class="text-xl placeholder:!text-black !text-black" name="ellipsis-horizontal"></ion-icon>
-                            </button>
-                            <div class="w-[245px]" uk-dropdown="pos: bottom-right; animation: uk-animation-scale-up uk-transform-origin-top-right; animate-out: truemode: click">
-                                <form>
-                                    <button type="submit" class="hover\:bg-red-50 icon-link">
-                                        <ion-icon class="text-xl shrink-0" name="flag-outline"></ion-icon> Report
-                                    </button>
-                                </form>
-                                <hr />
-                                <form>
-                                    <button type="submit" class="hover\:bg-red-50 icon-link">
-                                        <ion-icon class="text-xl" name="lock-closed-outline"></ion-icon> Set as private
-                                    </button>
-                                </form>
-                                <hr />
-                                <form>
-                                    <button type="submit" class="hover\:bg-red-50 icon-link">
-                                        <ion-icon class="text-xl" name="trash-bin-outline"></ion-icon> Delete post
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
+                @if(!Model.Any()) {
+                    <div class="bg-white !text-black rounded-xl shadow-sm md:p-4 p-2 space-y-4 text-sm font-medium border1" style="width: 580px">
+                        Currently, there are no posts available. Would you like to create the first one?
                     </div>
-                    @* Post Content *@
-                    <a>
-                        <div class="sm:px-4 p-2.5 pt-0 w-full">
-                            <p class="font-normal !text-black">
-                                Some content
-                            </p>
-                        </div>
-                    </a>
-                    @* Icons *@
-                    <div class="sm:p-4 p-2.5 flex items-center gap-4 text-xs font-semibold">
-                        <div class="flex items-center gap-2.5 ">
-                            <form>
-                                <button type="submit" class="button-icon like-button text-red-500 bg-red-100">
-                                    <ion-icon class="text-lg" name="heart-outline"></ion-icon>
-                                </button>
-                            </form>
-                            <a href="#">3</a>
-                        </div>
-                        <div lcass="flex items-center gap-3">
-                            <a class="button-icon">
-                                <ion-icon class="text-lg" name="chatbubble-ellipses-outline"></ion-icon>
-                            </a>
-                            <a href="#">4</a>
-                        </div>
-                        <div class="ml-auto"></div>
-                        <div class="flex-items-center gap-2">
-                            <form>
-                                <button type="submit" class="button-icon favorite-button ml-auto text-orange-500 bt-orange-100">
-                                    <ion-icon class="text-lg" name="bookmark-outline"></ion-icon>
-                                </button>
-                            </form>
-                            <a href="#">2</a>
-                        </div>
-                    </div>
-                    @* Comments *@
-                    <div>
-                        <div class="p-2.5 border-t border-gray-100 font-normal space-y-3 relative">
-                            <div class="flex items-styart gap-3 relative">
-                                <a>
-                                    <img src="~/images/user-profile.svg" class="w-6 h-6 mt-1 rounded-full" />
-                                </a>
-                                <div class="flex-1">
-                                    <div class="flex justify-content-between">
-                                        <a class="text-black font-medium inline-block flex-grow">
-                                            Tester McTestface
-                                        </a>
-                                        <small class="!text-black">1 hour ago</small>
-                                    </div>
-                                    <div class="flex items-center justify-between">
-                                        <p class="mt-0.5 !text-black">
-                                            This is amazing!
-                                        </p>
-                                        <form class="remove-comment-form">
-                                            <button type="submit" class="text-red-500 text-xs ml-2" title="Remove post comment">
-                                                <ion-icon name="trash-outline"></ion-icon>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="p-1.5">
-                                <a class="!text-black">
-                                    Show all comments
-                                </a>
-                            </div>
-                        </div>
-                        <form class="add-comment-form">
-                            <div class="sm:px-4 sm:py-3 border-t border-gray-100 flex items-center gap-1">
-                                <a>
-                                    <img src="~/images/user-profile.svg" class="w-6 h-6 rounded-full" />
-                                </a>
-                                <div class="flex-1 relative overflow-hidden h-10">
-                                    <textarea name="content" placeholder="Add Comment..." rows="1" class="w-full resize-none px-4 py-2 focus:!border-transparent focus:!ring-transparent !text-black"></textarea>
-                                </div>
-                                <button type="submit" class="!text-black text-sm-rounded-full py-1.5 px-3.5 bg-secondary">Comment</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                } else {
+                    @foreach (var post in Model)
+                    {
+                        <partial name="Home/_Post" model="post" />
+                    }
+                }
             </div>
         </div>
         <div class="flex-1">
@@ -192,4 +84,4 @@
     </div>
 </main>
 <partial name="Modals/_CreateStory" />
-<partial name="Modals/_CreateStatus" />
+<partial name="Modals/_CreateStatus" model="new PostVM()" />
