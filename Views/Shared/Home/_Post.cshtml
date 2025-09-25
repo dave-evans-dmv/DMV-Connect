@@ -24,10 +24,10 @@
 
     bool isLiked = Model.Likes.Any(n => n.UserId == USER_ID);
     bool isFavorited = Model.Favorites.Any(n => n.UserId == USER_ID);
-
+    bool isReported = Model.Reports.Any(n => n.UserId == USER_ID);
     bool isPrivate = Model.isPrivate;
 }
-@if(!isPrivate || Model.UserId == USER_ID)
+@if ((!isPrivate || Model.UserId == USER_ID) && !isReported && Model.NrOfReports <= 3)
 {
     <div class="relative bg-white rounded-xl shadow-sm text-sm font-medium border1 @(isPrivate ? "border-dashed border-pink-400 border-4" : "")">
         @if (isPrivate)
@@ -47,6 +47,12 @@
                     <div class="text-xs !text-black" title="@Model.DateCreated.ToString("M/dd/yyyy hh:mm tt")">@displayTime</div>
                 </a>
             </div>
+            <div class="">
+                @for(int i = 0; i < Model.NrOfReports; i++)
+                {
+                    <ion-icon class="text-xl text-red-600" name="flag"></ion-icon>
+                }
+            </div>
             <div class="-mr-1">
                 <button type="button" class="button-icon w-8 w-8">
                     <ion-icon class="text-xl placeholder:!text-black !text-black" name="ellipsis-horizontal"></ion-icon>
@@ -54,7 +60,9 @@
                 <div class="w-[245px]" uk-dropdown="pos: bottom-right; animation: uk-animation-scale-up uk-transform-origin-top-right; animate-out: truemode: click">
                     @if (Model.UserId != USER_ID)
                     {
-                        <form>
+                        <form asp-controller="Home" asp-action="AddPostReport">
+                            <input type="hidden" name="postId" value="@Model.Id" />
+                            <input type="hidden" name="userId" value="@USER_ID" />
                             <button type="submit" class="hover:bg-red-50 hover:bg-opacity-80 icon-link">
                                 <ion-icon class="text-xl shrink-0" name="flag-outline"></ion-icon> Report
                             </button>
@@ -64,12 +72,14 @@
                     {
                         <form asp-controller="Home" asp-action="TogglePostVisibility">
                             <input type="hidden" name="postId" value="@Model.Id" />
+                            <input type="hidden" name="userId" value="@USER_ID" />
                             <button type="submit" class="hover:bg-red-50 hover:bg-opacity-80 icon-link">
                                 <ion-icon class="text-xl" name="@(isPrivate ? "lock-open-outline" : "lock-closed")"></ion-icon> Set as @(isPrivate ? "public" : "private")
                             </button>
                         </form>
                         <hr />
-                        <form>
+                        <form asp-controller="Home" asp-action="DeletePost">
+                            <input type="hidden" name="postId" value="@Model.Id" />
                             <button type="submit" class="hover:bg-red-50 hover:bg-opacity-80 icon-link">
                                 <ion-icon class="text-xl" name="trash-bin-outline"></ion-icon> Delete post
                             </button>
@@ -185,7 +195,7 @@
             </div>
             <form class="add-comment-form" asp-controller="Home" asp-action="AddPostComment">
                 <input type="hidden" name="postId" value="@Model.Id" />
-                <div class="sm:px-4 sm:py-3 border-t border-gray-100 flex items-center gap-1">
+                <div class="sm:px-4 sm:py-3 @(Model.Comments.Count > 0 ? "border-t" : "") border-gray-100 flex items-center gap-1">
                     <a>
                         <img src="~/images/user-profile.svg" class="w-6 h-6 rounded-full" />
                     </a>
