@@ -20,10 +20,14 @@ namespace DMV_Connect.Controllers
 
         public async Task<IActionResult> Index()
         {
+            int loggedInUserId = 2;
+
             var allPosts = await _context.Posts
+                .Where(n => !n.isPrivate || n.UserId == loggedInUserId)
                 .Include(n => n.User)
                 .Include(l => l.Likes)
                 .Include(c => c.Comments)
+                .Include(f => f.Favorites)
                 .OrderByDescending(n => n.DateCreated)
                 .ToListAsync();
 
@@ -103,6 +107,53 @@ namespace DMV_Connect.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> TogglePostFavorite(PostFavoriteVM postFavoriteVM)
+        {
+            int loggedInUserId = 2;
+
+            // Check if user has already favorited the post
+            var favorite = await _context.Favorites
+                .Where(l => l.PostId == postFavoriteVM.PostId && l.UserId == loggedInUserId)
+                .FirstOrDefaultAsync();
+
+            if (favorite != null)
+            {
+                _context.Favorites.Remove(favorite);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                var newFavorite = new Favorite()
+                {
+                    PostId = postFavoriteVM.PostId,
+                    UserId = loggedInUserId
+                };
+                await _context.Favorites.AddAsync(newFavorite);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> TogglePostVisibility(PostVisibilityVM postVisibilityVM)
+        {
+            int loggedInUserId = 2;
+
+            var post = await _context.Posts
+                .FirstOrDefaultAsync(l => l.Id == postVisibilityVM.PostId && l.UserId == loggedInUserId);
+
+            if (post != null)
+            {
+                post.isPrivate = !post.isPrivate;
+                _context.Posts.Update(post);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
         public async Task<IActionResult> AddPostComment(PostCommentVM postCommentVM)
         {
             int loggedInUserId = 2;
@@ -121,5 +172,20 @@ namespace DMV_Connect.Controllers
 
             return RedirectToAction("Index");
         }
+
+        [HttpPost]
+        public async Task<IActionResult> RemovePostComment(PostCommentDeleteVM postCommentDeleteVM)
+        {
+            var commentDb = await _context.Comments.FirstOrDefaultAsync(c => c.Id == postCommentDeleteVM.commentId);
+
+            if (commentDb != null)
+            {
+                _context.Comments.Remove(commentDb);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction("Index");
+        }
+
     }
 }
