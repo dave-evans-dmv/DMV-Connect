@@ -1,4 +1,4 @@
-﻿namespace DMV_Connect.ViewModels.Home
+﻿namespace DMVConnect.ViewModels.Home
 {
     public class PostVisibilityVM
     {

@@ -1,11 +1,11 @@
 using System.Diagnostics;
-using DMV_Connect.ViewModels.Home;
+using DMVConnect.ViewModels.Home;
 using DMVConnect.Data;
 using DMVConnect.Data.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace DMV_Connect.Controllers
+namespace DMVConnect.Controllers
 {
     public class HomeController : Controller
     {
@@ -55,7 +55,7 @@ namespace DMV_Connect.Controllers
                 string rootFolderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
                 if (post.Image.ContentType.Contains("image"))
                 {
-                    string rootFolderPathImages = Path.Combine(rootFolderPath, "images/uploaded");
+                    string rootFolderPathImages = Path.Combine(rootFolderPath, "images/posts");
                     Directory.CreateDirectory(rootFolderPathImages);
 
                     string fileName = Guid.NewGuid().ToString() + Path.GetExtension(post.Image.FileName);
@@ -65,7 +65,7 @@ namespace DMV_Connect.Controllers
                         await post.Image.CopyToAsync(stream);
 
                     // Set the URL to the newPost object
-                    newPost.ImageUrl = "/images/uploaded/" + fileName;
+                    newPost.ImageUrl = "/images/posts/" + fileName;
                 }
             }
 
