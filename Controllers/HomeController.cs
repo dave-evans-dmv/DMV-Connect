@@ -4,6 +4,8 @@ using DMVConnect.Data;
 using DMVConnect.Data.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using DMVConnect.Data.Helpers;
+using DMVConnect.Data.Services;
 
 namespace DMVConnect.Controllers
 {
@@ -11,26 +13,23 @@ namespace DMVConnect.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly AppDbContext _context;
+        private readonly IPostService _postService;
 
         private int loggedInUserId = 2;
 
-        public HomeController(ILogger<HomeController> logger, AppDbContext context)
+        public HomeController(
+            ILogger<HomeController> logger, 
+            AppDbContext context, 
+            IPostService postService)
         {
             _logger = logger;
             _context = context;
+            _postService = postService;
         }
 
         public async Task<IActionResult> Index()
         {
-            var allPosts = await _context.Posts
-                .Where(n => !n.isPrivate || n.UserId == loggedInUserId)
-                .Include(n => n.User)
-                .Include(l => l.Likes)
-                .Include(c => c.Comments).ThenInclude(n => n.User)
-                .Include(r => r.Reports)
-                .Include(f => f.Favorites)
-                .OrderByDescending(n => n.DateCreated)
-                .ToListAsync();
+            var allPosts = await _postService.GetAllPostsync(loggedInUserId);
 
             return View(allPosts);
         }
@@ -49,28 +48,36 @@ namespace DMVConnect.Controllers
                 UserId = loggedInUserId
             };
 
-            // Check and save image
-            if (post.Image != null && post.Image.Length > 0)
+            await _postService.CreatePostAsync(newPost, post.Image);
+
+            // Find & Store Hashtags
+            var postHashtags = HashtagHelper.GetHashtags(post.Content);
+
+            foreach (var tag in postHashtags)
             {
-                string rootFolderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-                if (post.Image.ContentType.Contains("image"))
+                var hashtagDb = await _context.Hashtags.FirstOrDefaultAsync(n => n.Value == tag);
+
+                if (hashtagDb != null)
                 {
-                    string rootFolderPathImages = Path.Combine(rootFolderPath, "images/posts");
-                    Directory.CreateDirectory(rootFolderPathImages);
+                    hashtagDb.Count++;
+                    hashtagDb.DateUpdated = DateTime.Now;
 
-                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(post.Image.FileName);
-                    string filePath = Path.Combine(rootFolderPathImages, fileName);
+                    _context.Hashtags.Update(hashtagDb);
+                    await _context.SaveChangesAsync();
+                } else
+                {
+                    var newTag = new Hashtag()
+                    {
+                        Value = tag,
+                        Count = 1,
+                        DateCreated = DateTime.Now,
+                        DateUpdated = DateTime.Now
+                    };
 
-                    using (var stream = new FileStream(filePath, FileMode.Create))
-                        await post.Image.CopyToAsync(stream);
-
-                    // Set the URL to the newPost object
-                    newPost.ImageUrl = "/images/posts/" + fileName;
+                    _context.Hashtags.Add(newTag);
+                    await _context.SaveChangesAsync();
                 }
             }
-
-            await _context.Posts.AddAsync(newPost);
-            await _context.SaveChangesAsync();
 
             return RedirectToAction("Index");
         }
@@ -78,26 +85,7 @@ namespace DMVConnect.Controllers
         [HttpPost]
         public async Task<IActionResult> TogglePostLike(PostLikeVM postLikeVM)
         {
-            // Check if user has already liked the post
-            var like = await _context.Likes
-                .Where(l => l.PostId == postLikeVM.PostId && l.UserId == loggedInUserId)
-                .FirstOrDefaultAsync();
-
-            if (like != null)
-            {
-                _context.Likes.Remove(like);
-                await _context.SaveChangesAsync();
-            }
-            else
-            {
-                var newLike = new Like()
-                {
-                    PostId = postLikeVM.PostId,
-                    UserId = loggedInUserId
-                };
-                await _context.Likes.AddAsync(newLike);
-                await _context.SaveChangesAsync();
-            }
+            await _postService.TogglePostLikeAsync(postLikeVM.PostId, loggedInUserId);
 
             return RedirectToAction("Index");
         }
@@ -105,26 +93,7 @@ namespace DMVConnect.Controllers
         [HttpPost]
         public async Task<IActionResult> TogglePostFavorite(PostFavoriteVM postFavoriteVM)
         {
-            // Check if user has already favorited the post
-            var favorite = await _context.Favorites
-                .Where(l => l.PostId == postFavoriteVM.PostId && l.UserId == loggedInUserId)
-                .FirstOrDefaultAsync();
-
-            if (favorite != null)
-            {
-                _context.Favorites.Remove(favorite);
-                await _context.SaveChangesAsync();
-            }
-            else
-            {
-                var newFavorite = new Favorite()
-                {
-                    PostId = postFavoriteVM.PostId,
-                    UserId = loggedInUserId
-                };
-                await _context.Favorites.AddAsync(newFavorite);
-                await _context.SaveChangesAsync();
-            }
+            await _postService.TogglePostFavoriteAsync(postFavoriteVM.PostId, loggedInUserId);
 
             return RedirectToAction("Index");
         }
@@ -132,15 +101,7 @@ namespace DMVConnect.Controllers
         [HttpPost]
         public async Task<IActionResult> TogglePostVisibility(PostVisibilityVM postVisibilityVM)
         {
-            var post = await _context.Posts
-                .FirstOrDefaultAsync(l => l.Id == postVisibilityVM.PostId && l.UserId == loggedInUserId);
-
-            if (post != null)
-            {
-                post.isPrivate = !post.isPrivate;
-                _context.Posts.Update(post);
-                await _context.SaveChangesAsync();
-            }
+            await _postService.TogglePostVisibilityAsync(postVisibilityVM.PostId, loggedInUserId);
 
             return RedirectToAction("Index");
         }
@@ -157,8 +118,7 @@ namespace DMVConnect.Controllers
                 DateUpdated = DateTime.Now
             };
 
-            await _context.Comments.AddAsync(newComment);
-            await _context.SaveChangesAsync();
+            await _postService.AddPostCommentAsync(newComment, loggedInUserId);
 
             return RedirectToAction("Index");
         }
@@ -166,25 +126,7 @@ namespace DMVConnect.Controllers
         [HttpPost]
         public async Task<IActionResult> AddPostReport(PostReportVM postReportVM)
         {
-            var newReport = new Report()
-            {
-                PostId = postReportVM.PostId,
-                UserId = loggedInUserId,
-                DateCreated = DateTime.Now
-            };
-
-            await _context.Reports.AddAsync(newReport);
-
-            var post = await _context.Posts
-                .FirstOrDefaultAsync(l => l.Id == postReportVM.PostId);
-
-            if (post != null)
-            {
-                post.NrOfReports++;
-                _context.Posts.Update(post);
-            }
-
-            await _context.SaveChangesAsync();
+            await _postService.ReportPostAsync(postReportVM.PostId, loggedInUserId);
 
             return RedirectToAction("Index");
         }
@@ -192,13 +134,7 @@ namespace DMVConnect.Controllers
         [HttpPost]
         public async Task<IActionResult> RemovePostComment(PostCommentDeleteVM postCommentDeleteVM)
         {
-            var commentDb = await _context.Comments.FirstOrDefaultAsync(c => c.Id == postCommentDeleteVM.commentId);
-
-            if (commentDb != null)
-            {
-                _context.Comments.Remove(commentDb);
-                await _context.SaveChangesAsync();
-            }
+            await _postService.RemovePostCommentAsync(postCommentDeleteVM.commentId);
 
             return RedirectToAction("Index");
         }
@@ -206,23 +142,8 @@ namespace DMVConnect.Controllers
         [HttpPost]
         public async Task<IActionResult> DeletePost(PostDeleteVM postDeleteVM)
         {
-            var post = await _context.Posts
-                .Include(n => n.Likes)
-                .Include(n => n.Favorites)
-                .Include(n => n.Comments)
-                .Include(n => n.Reports)
-                .FirstOrDefaultAsync(c => c.Id == postDeleteVM.PostId);
+            await _postService.DeletePostAsync(postDeleteVM.PostId);
             
-            if (post != null)
-            {
-                _context.Likes.RemoveRange(post.Likes);
-                _context.Favorites.RemoveRange(post.Favorites);
-                _context.Comments.RemoveRange(post.Comments);
-                _context.Reports.RemoveRange(post.Reports);
-
-                _context.Posts.Remove(post);
-                await _context.SaveChangesAsync();
-            }
             return RedirectToAction("Index");
         }
     }
