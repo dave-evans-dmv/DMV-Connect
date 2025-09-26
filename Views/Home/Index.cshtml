@@ -85,3 +85,13 @@
 </main>
 <partial name="Modals/_CreateStory" />
 <partial name="Modals/_CreateStatus" model="new PostVM()" />
+
+@* Delete Post *@
+<partial name="Home/_PostDeleteModal" />
+<script>
+    function openPostDeleteModal(postId) {
+        UIkit.dropdown('.post-options-dropdown').hide();
+        document.querySelector('#deleteConfirmationPostId').value = postId;
+        UIkit.modal('#postDeleteModal').show();
+    }
+</script>

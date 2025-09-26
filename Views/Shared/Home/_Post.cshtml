@@ -57,7 +57,7 @@
                 <button type="button" class="button-icon w-8 w-8">
                     <ion-icon class="text-xl placeholder:!text-black !text-black" name="ellipsis-horizontal"></ion-icon>
                 </button>
-                <div class="w-[245px]" uk-dropdown="pos: bottom-right; animation: uk-animation-scale-up uk-transform-origin-top-right; animate-out: truemode: click">
+                <div class="w-[245px] post-options-dropdown" uk-dropdown="pos: bottom-right; animation: uk-animation-scale-up uk-transform-origin-top-right; animate-out: truemode: click">
                     @if (Model.UserId != USER_ID)
                     {
                         <form asp-controller="Home" asp-action="AddPostReport">
@@ -78,12 +78,9 @@
                             </button>
                         </form>
                         <hr />
-                        <form asp-controller="Home" asp-action="DeletePost">
-                            <input type="hidden" name="postId" value="@Model.Id" />
-                            <button type="submit" class="hover:bg-red-50 hover:bg-opacity-80 icon-link">
-                                <ion-icon class="text-xl" name="trash-bin-outline"></ion-icon> Delete post
-                            </button>
-                        </form>
+                        <button type="button" onclick="openPostDeleteModal('@Model.Id')" class="icon-link icon-link-no-form">
+                            <ion-icon class="text-xl" name="trash-bin-outline"></ion-icon> Delete post
+                        </button>
                     }
                 </div>
             </div>

@@ -23,7 +23,8 @@ body {
   margin-bottom: 60px;
 }
 
-form > button.icon-link {
+form > button.icon-link,
+button.icon-link-no-form.icon-link {
     padding: 8px 10px;
     display: flex;
     align-items: center;
@@ -34,7 +35,12 @@ form > button.icon-link {
     width: 100%;
 }
 
-form > button.icon-link > ion-icon {
+button.icon-link-no-form.icon-link:hover {
+   background-color: rgb(255, 0, 0, 0.8);
+}
+
+form > button.icon-link > ion-icon,
+button.icon-link-no-form.icon-link > ion-icon {
     margin-right: 8px;
 }
 
