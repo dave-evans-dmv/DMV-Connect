@@ -1,6 +1,6 @@
 ﻿using Microsoft.Identity.Client;
 
-namespace DMV_Connect.ViewModels.Home
+namespace DMVConnect.ViewModels.Home
 {
     public class PostCommentDeleteVM
     {
