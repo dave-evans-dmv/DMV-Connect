@@ -6,25 +6,29 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DMVConnect.Data.Helpers;
 using DMVConnect.Data.Services;
+using DMVConnect.Data.Helpers.Enums;
 
 namespace DMVConnect.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly AppDbContext _context;
         private readonly IPostService _postService;
+        private readonly IFileService _fileService;
+        private readonly IHashtagService _hashtagService;
 
         private int loggedInUserId = 2;
 
         public HomeController(
             ILogger<HomeController> logger, 
-            AppDbContext context, 
-            IPostService postService)
+            IPostService postService,
+            IHashtagService hastagService,
+            IFileService fileService)
         {
             _logger = logger;
-            _context = context;
             _postService = postService;
+            _hashtagService = hastagService;
+            _fileService = fileService;
         }
 
         public async Task<IActionResult> Index()
@@ -35,48 +39,26 @@ namespace DMVConnect.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreatePost(PostVM post)
+        public async Task<IActionResult> CreatePost(PostVM postVM)
         {
-            //Create new post
+            var imageUploadPath = await _fileService.UploadImageAsync(postVM.Image, ImageFileType.PostImage);
+
+            //Create new postVM
             var newPost = new Post
             {
-                Content = post.Content,
+                Content = postVM.Content,
                 DateCreated = DateTime.Now,
                 DateUpdated = DateTime.Now,
-                ImageUrl = "",
+                ImageUrl = imageUploadPath,
                 NrOfReports = 0,
                 UserId = loggedInUserId
             };
 
-            await _postService.CreatePostAsync(newPost, post.Image);
+            await _postService.CreatePostAsync(newPost);
 
-            // Find & Store Hashtags
-            var postHashtags = HashtagHelper.GetHashtags(post.Content);
-
-            foreach (var tag in postHashtags)
+            if (postVM.Content != null)
             {
-                var hashtagDb = await _context.Hashtags.FirstOrDefaultAsync(n => n.Value == tag);
-
-                if (hashtagDb != null)
-                {
-                    hashtagDb.Count++;
-                    hashtagDb.DateUpdated = DateTime.Now;
-
-                    _context.Hashtags.Update(hashtagDb);
-                    await _context.SaveChangesAsync();
-                } else
-                {
-                    var newTag = new Hashtag()
-                    {
-                        Value = tag,
-                        Count = 1,
-                        DateCreated = DateTime.Now,
-                        DateUpdated = DateTime.Now
-                    };
-
-                    _context.Hashtags.Add(newTag);
-                    await _context.SaveChangesAsync();
-                }
+                await _hashtagService.ProcessHashtagForNewPostAsync(postVM.Content);
             }
 
             return RedirectToAction("Index");
@@ -142,8 +124,13 @@ namespace DMVConnect.Controllers
         [HttpPost]
         public async Task<IActionResult> DeletePost(PostDeleteVM postDeleteVM)
         {
-            await _postService.DeletePostAsync(postDeleteVM.PostId);
-            
+            var postDb = await _postService.DeletePostAsync(postDeleteVM.PostId);
+
+            if (postDb.Content != null)
+            {
+                await _hashtagService.ProcessHashtagsForRemovedPostAsync(postDb.Content);
+            }
+
             return RedirectToAction("Index");
         }
     }

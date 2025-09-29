@@ -35,28 +35,28 @@
 </div>
 
 <script>
-    const imageUploadButton = document.querySelector('#storyUploadBtn'),
-        imageUpload = document.querySelector('#storyUpload'),
-        imagePreview = document.querySelector('#storyPreview'),
-        imagePreviewContainer = document.querySelector('#storyPreviewContainer');
+    const storyImageUploadButton = document.querySelector('#storyUploadBtn'),
+        storyImageUpload = document.querySelector('#storyUpload'),
+        storyImagePreview = document.querySelector('#storyPreview'),
+        storyImagePreviewContainer = document.querySelector('#storyPreviewContainer');
 
-    imageUploadButton.addEventListener('click', () => {
-        imageUpload.click();
+    storyImageUploadButton.addEventListener('click', () => {
+        storyImageUpload.click();
     });
 
-    imageUpload.addEventListener('change', (event) => {
+    storyImageUpload.addEventListener('change', (event) => {
         const file = event.target.files[0];
 
         if (file)
         {
             const reader = new FileReader();
-            imagePreviewContainer.classList.remove('hidden');
+            storyImagePreviewContainer.classList.remove('hidden');
             reader.onload = (e) => {
-                imagePreview.src = e.target.result;
+                storyImagePreview.src = e.target.result;
             }
             reader.readAsDataURL(file);
         } else {
-            imagePreviewContainer.classList.add('hidden');
+            storyImagePreviewContainer.classList.add('hidden');
         }
     });
 </script>
