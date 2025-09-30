@@ -1,7 +1,7 @@
 ﻿using DMVConnect.Data;
 using DMVConnect.Data.Helpers.Enums;
+using DMVConnect.Data.Interfaces;
 using DMVConnect.Data.Models;
-using DMVConnect.Data.Services;
 using DMVConnect.ViewModels.Stories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

@@ -1,5 +1,5 @@
-﻿using DMVConnect.Data.Models;
-using DMVConnect.Data.Services;
+﻿using DMVConnect.Data.Interfaces;
+using DMVConnect.Data.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 

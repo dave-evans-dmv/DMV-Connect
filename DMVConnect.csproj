@@ -9,8 +9,8 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\images\posts\" />
+    <Folder Include="wwwroot\images\profiles\" />
     <Folder Include="wwwroot\images\stories\" />
-    <Folder Include="wwwroot\images\uploaded\" />
     <Folder Include="wwwroot\images\placeholders\" />
   </ItemGroup>
 

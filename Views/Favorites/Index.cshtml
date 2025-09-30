@@ -2,7 +2,7 @@
 
 <main id="site__main" class="2xl:ml-[--w-side] xl:ml-[--w-side-sm] p-2.5 h-[calc(100vh-var(--m-top))] mt-[--m-top]">
     <div id="js-oversized" class="lg:flex 2xl:gap-16 gap-12 max-w-[1065px] mx-auto">
-        <div class="max-w-[680px] mx-auto">
+        <div class="w-[680px] mx-auto">
 
             @* Stories *@
             @await Component.InvokeAsync("Stories")
@@ -39,7 +39,7 @@
                 }
             </div>
         </div>
-        <div class="flex-1">
+        <div class="flex-1 max-w-[480px]">
             <div class="lg:space-y-4 lg:pb-8 max-lg:grid sm:grid-cols-2 max-lg:gap-6 ">
                 <div class="box p-5 px-6">
                     <partial name="Sidebar/_SuggestedConnections" />
