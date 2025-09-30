@@ -5,8 +5,8 @@ using DMVConnect.Data.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using DMVConnect.Data.Helpers;
-using DMVConnect.Data.Services;
 using DMVConnect.Data.Helpers.Enums;
+using DMVConnect.Data.Interfaces;
 
 namespace DMVConnect.Controllers
 {
