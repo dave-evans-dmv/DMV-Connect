@@ -38,11 +38,11 @@ namespace DMVConnect.Controllers
             return View(allPosts);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Details(int postId)
+        [HttpGet]
+        public async Task<IActionResult> PostDetails(int postId)
         {
             var post = await _postService.GetPostByIdAsync(postId);
-            return View(post);
+            return View("PostDetails", post);
         }
 
         [HttpPost]
