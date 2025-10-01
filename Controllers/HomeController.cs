@@ -39,6 +39,13 @@ namespace DMVConnect.Controllers
         }
 
         [HttpPost]
+        public async Task<IActionResult> Details(int postId)
+        {
+            var post = await _postService.GetPostByIdAsync(postId);
+            return View(post);
+        }
+
+        [HttpPost]
         public async Task<IActionResult> CreatePost(PostVM postVM)
         {
             var imageUploadPath = await _fileService.UploadImageAsync(postVM.Image, ImageFileType.PostImage);
