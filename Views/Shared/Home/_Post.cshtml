@@ -26,6 +26,9 @@
     bool isFavorited = Model.Favorites.Any(n => n.UserId == USER_ID);
     bool isReported = Model.Reports.Any(n => n.UserId == USER_ID);
     bool isPrivate = Model.isPrivate;
+    string defaultUserImage = "~/images/user-profile.svg";
+
+    bool showAllComments = ViewData["ShowAllComments"] as bool? ?? false;
 }
 @if ((!isPrivate || Model.UserId == USER_ID) && !isReported && Model.NrOfReports <= 3)
 {
@@ -39,7 +42,7 @@
         @* Post Heading *@
         <div class="flex gap-3 sm:p-4 p-2.5 text-sm font-medium">
             <a>
-                <img src="@(Model.User.ProfilePictureUrl ?? "~/images/user-profile.svg")" class="w-9 h-9 rounded-full" />
+                <img src="@(Model.User.ProfilePictureUrl ?? Url.Content(defaultUserImage))" class="w-9 h-9 rounded-full" />
             </a>
             <div class="flex-1">
                 <a>
@@ -86,7 +89,7 @@
             </div>
         </div>
         @* Post Content *@
-        <a asp-controller="Home" asp-action="Details" asp-route-postId="@Model.Id">
+        <a asp-controller="Home" asp-action="PostDetails" asp-route-postId="@Model.Id">
             <div class="sm:px-4 p-2.5 pt-0 w-full">
                 <p class="font-normal !text-black">
                     @Model.Content
@@ -95,8 +98,8 @@
         </a>
         @if (!string.IsNullOrEmpty(Model.ImageUrl))
         {
-            <a asp-controller="Home" asp-action="Details" asp-route-postId="@Model.Id">
-                <div class="relative w-full lg:h-96 h-full sm:-x-4 p-2">
+            <a asp-controller="Home" asp-action="PostDetails" asp-route-postId="@Model.Id">
+                <div class="relative w-full h-full">
                     <img alt="@Model.Content" src="@Model.ImageUrl" class="sm:rounded-lg w-full h-full object-cover" />
                 </div>
             </a>
@@ -135,7 +138,7 @@
         @* Comments *@
         <div>
             <div class="p-2.5 border-t border-gray-100 font-normal space-y-3 relative">
-                @foreach(var comment in Model.Comments.OrderByDescending(nameof => nameof.DateCreated).Take(2))
+                @foreach(var comment in Model.Comments.OrderByDescending(nameof => nameof.DateCreated).Take(showAllComments ? Model.Comments.Count : 2))
                 {
                     TimeSpan timeSpanSinceComment = DateTime.Now.Subtract(comment.DateCreated);
                     string displayCommentTime = timeSpanSinceComment switch
@@ -158,7 +161,7 @@
 
                     <div class="flex items-styart gap-3 relative">
                         <a>
-                            <img src="@(comment.User.ProfilePictureUrl ?? "~/images/user-profile.svg")" class="w-6 h-6 mt-1 rounded-full" />
+                            <img alt="User Profile Image" src="@(comment.User.ProfilePictureUrl ?? Url.Content(defaultUserImage))" class="w-6 h-6 mt-1 rounded-full" />
                         </a>
                         <div class="flex-1">
                             <div class="flex justify-content-between">
@@ -181,10 +184,10 @@
                         </div>
                     </div>
                 }
-                @if (Model.Comments.Count >= 3)
+                @if (Model.Comments.Count >= 3 && !showAllComments)
                 {
                     <div class="p-1.5">
-                        <a class="!text-black" asp-controller="Home" asp-action="Details" asp-route-postId="@Model.Id">
+                        <a class="!text-black" asp-controller="Home" asp-action="PostDetails" asp-route-postId="@Model.Id">
                             Show all comments
                         </a>
                     </div>
@@ -194,7 +197,7 @@
                 <input type="hidden" name="postId" value="@Model.Id" />
                 <div class="sm:px-4 sm:py-3 @(Model.Comments.Count > 0 ? "border-t" : "") border-gray-100 flex items-center gap-1">
                     <a>
-                        <img src="~/images/user-profile.svg" class="w-6 h-6 rounded-full" />
+                        <img alt="User Profile Image" src="@Url.Content(defaultUserImage)" class="w-6 h-6 rounded-full" />
                     </a>
                     <div class="flex-1 relative overflow-hidden h-10">
                         <textarea name="content" placeholder="Add Comment..." rows="1" class="w-full resize-none px-4 py-2 focus:!border-transparent focus:!ring-transparent !text-white"></textarea>
