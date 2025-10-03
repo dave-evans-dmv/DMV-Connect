@@ -1,7 +1,9 @@
-﻿@model Post
+﻿@inject UserManager<User> UserManager;
+@using System.Security.Claims;
+@model Post
 
 @{
-    int USER_ID = 2;
+    int USER_ID = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int result) ? result : 0;
 
     string displayTime = GlobalHelpers.GetPostedTime(Model.DateCreated);
 
@@ -12,6 +14,9 @@
     string defaultUserImage = "~/images/user-profile.svg";
 
     bool showAllComments = ViewData["ShowAllComments"] as bool? ?? false;
+    var loggedInUser = await UserManager.GetUserAsync(User);
+    var profilePicture = loggedInUser?.ProfilePictureUrl;
+
 }
 @if ((!isPrivate || Model.UserId == USER_ID) && !isReported && Model.NrOfReports <= 3)
 {
@@ -163,7 +168,7 @@
                 <input type="hidden" name="postId" value="@Model.Id" />
                 <div class="sm:px-4 sm:py-3 @(Model.Comments.Count > 0 ? "border-t" : "") border-gray-100 flex items-center gap-1">
                     <a>
-                        <img alt="User Profile Image" src="@Url.Content(defaultUserImage)" class="w-6 h-6 rounded-full" />
+                        <img alt="User Profile Image" src="@(profilePicture ?? Url.Content(defaultUserImage))" class="w-6 h-6 rounded-full" />
                     </a>
                     <div class="flex-1 relative overflow-hidden h-10">
                         <textarea name="content" placeholder="Add Comment..." rows="1" class="w-full resize-none px-4 py-2 focus:!border-transparent focus:!ring-transparent !text-white"></textarea>

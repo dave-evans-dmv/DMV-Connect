@@ -17,7 +17,7 @@ localStorage.removeItem('theme')
 
 
 // add post upload image 
-document.getElementById('addPostUrl').addEventListener('change', function(){
+document.getElementById('addPostUrl')?.addEventListener('change', function(){
 if (this.files[0] ) {
     var picture = new FileReader();
     picture.readAsDataURL(this.files[0]);
@@ -30,7 +30,7 @@ if (this.files[0] ) {
 
 
 // Create Status upload image 
-document.getElementById('createStatusUrl').addEventListener('change', function(){
+document.getElementById('createStatusUrl')?.addEventListener('change', function(){
 if (this.files[0] ) {
     var picture = new FileReader();
     picture.readAsDataURL(this.files[0]);
@@ -43,7 +43,7 @@ if (this.files[0] ) {
 
 
 // create product upload image
-document.getElementById('createProductUrl').addEventListener('change', function(){
+document.getElementById('createProductUrl')?.addEventListener('change', function(){
 if (this.files[0] ) {
     var picture = new FileReader();
     picture.readAsDataURL(this.files[0]);

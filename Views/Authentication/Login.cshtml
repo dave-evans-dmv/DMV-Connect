@@ -12,22 +12,25 @@
                 <div>
                     <label asp-for="Email">Email Address</label>
                     <div class="mt-2.5">
-                        <input asp-for="Email" id="email" name="email" type="email"  placeholder="Email" required class="!w-full" />
+                        <input asp-for="Email" id="Email" name="Email" type="email"  placeholder="Email" required class="!w-full" autocomplete="off"/>
+                        <span asp-validation-for="Email" class="text-red-500 text-xs mt-1"></span>
                     </div>
                 </div>
                 <div>
                     <label asp-for="Password">Password</label>
                     <div class="mt-2.5">
-                        <input asp-for="Password" id="password" name="password" type="password" placeholder="****" required class="!w-full" />
+                        <input asp-for="Password" id="Password" name="Password" type="password" placeholder="****" required class="!w-full" />
+                        <span asp-validation-for="Password" class="text-red-500 text-xs mt-1"></span>
                     </div>
                 </div>
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2.5">
-                        <input asp-for="RememberMe" id="rememberme" name="rememberme" type="checkbox" />
+                        <input asp-for="RememberMe" id="RememberMe" name="RememberMe" type="checkbox" />
                         <label asp-for="RememberMe" class="font-normal">Remember Me</label>
                     </div>
                     <a href="#" class="text-blue-700">Forgot password</a>
                 </div>
+                <div class="col-span-2 text-red-500 text-xs mt-1" asp-validation-summary="ModelOnly"></div>
                 <div>
                     <button type="submit" class="button bg-primary text-white w-full">Sign in</button>
                 </div>

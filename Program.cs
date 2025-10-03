@@ -3,6 +3,7 @@ using DMVConnect.Data.Helpers;
 using DMVConnect.Data.Interfaces;
 using DMVConnect.Data.Models;
 using DMVConnect.Data.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,11 +24,24 @@ builder.Services.AddScoped<IFileService, FileService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
 // Identity Config
-builder.Services.AddIdentity<User, IdentityRole<int>>()
+builder.Services.AddIdentity<User, IdentityRole<int>>(options =>
+{
+    // Password Settings
+    options.Password.RequireDigit = false;
+    options.Password.RequireLowercase = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequiredLength = 3;
+})
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddAuthentication();
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Authentication/Login"; // Defaults to /Account/Login
+    options.AccessDeniedPath = "/Authentication/AccessDenied";
+});
+
 builder.Services.AddAuthorization();
 
 var app = builder.Build();

@@ -1,23 +1,20 @@
-using System.Diagnostics;
-using DMVConnect.ViewModels.Home;
-using DMVConnect.Data;
-using DMVConnect.Data.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using DMVConnect.Data.Helpers;
+using DMVConnect.Controllers.Base;
 using DMVConnect.Data.Helpers.Enums;
 using DMVConnect.Data.Interfaces;
+using DMVConnect.Data.Models;
+using DMVConnect.ViewModels.Home;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace DMVConnect.Controllers
 {
-    public class HomeController : Controller
+    [Authorize]
+    public class HomeController : BaseController
     {
         private readonly ILogger<HomeController> _logger;
         private readonly IPostService _postService;
         private readonly IFileService _fileService;
         private readonly IHashtagService _hashtagService;
-
-        private int loggedInUserId = 2;
 
         public HomeController(
             ILogger<HomeController> logger, 
@@ -33,9 +30,22 @@ namespace DMVConnect.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var allPosts = await _postService.GetAllPostsync(loggedInUserId);
+            var loggedInUserId = GetUserId();
+            if (loggedInUserId == null) return RedirectToLogin();
+
+            var allPosts = await _postService.GetAllPostsync(loggedInUserId.Value);
 
             return View(allPosts);
+        }
+
+        public async Task<IActionResult> NavigateHome()
+        {
+            var loggedInUserId = GetUserId();
+            if (loggedInUserId == null) return RedirectToLogin();
+
+            var allPosts = await _postService.GetAllPostsync(loggedInUserId.Value);
+
+            return RedirectToAction("Index", "Home");
         }
 
         [HttpGet]
@@ -48,6 +58,9 @@ namespace DMVConnect.Controllers
         [HttpPost]
         public async Task<IActionResult> CreatePost(PostVM postVM)
         {
+            var loggedInUserId = GetUserId();
+            if (loggedInUserId == null) return RedirectToLogin();
+
             var imageUploadPath = await _fileService.UploadImageAsync(postVM.Image, ImageFileType.PostImage);
 
             //Create new postVM
@@ -58,7 +71,7 @@ namespace DMVConnect.Controllers
                 DateUpdated = DateTime.Now,
                 ImageUrl = imageUploadPath,
                 NrOfReports = 0,
-                UserId = loggedInUserId
+                UserId = loggedInUserId.Value
             };
 
             await _postService.CreatePostAsync(newPost);
@@ -74,7 +87,10 @@ namespace DMVConnect.Controllers
         [HttpPost]
         public async Task<IActionResult> TogglePostLike(PostLikeVM postLikeVM)
         {
-            await _postService.TogglePostLikeAsync(postLikeVM.PostId, loggedInUserId);
+            var loggedInUserId = GetUserId();
+            if (loggedInUserId == null) return RedirectToLogin();
+
+            await _postService.TogglePostLikeAsync(postLikeVM.PostId, loggedInUserId.Value);
 
             return RedirectToAction("Index");
         }
@@ -82,7 +98,10 @@ namespace DMVConnect.Controllers
         [HttpPost]
         public async Task<IActionResult> TogglePostFavorite(PostFavoriteVM postFavoriteVM)
         {
-            await _postService.TogglePostFavoriteAsync(postFavoriteVM.PostId, loggedInUserId);
+            var loggedInUserId = GetUserId();
+            if (loggedInUserId == null) return RedirectToLogin();
+
+            await _postService.TogglePostFavoriteAsync(postFavoriteVM.PostId, loggedInUserId.Value);
 
             return RedirectToAction("Index");
         }
@@ -90,7 +109,10 @@ namespace DMVConnect.Controllers
         [HttpPost]
         public async Task<IActionResult> TogglePostVisibility(PostVisibilityVM postVisibilityVM)
         {
-            await _postService.TogglePostVisibilityAsync(postVisibilityVM.PostId, loggedInUserId);
+            var loggedInUserId = GetUserId();
+            if (loggedInUserId == null) return RedirectToLogin();
+
+            await _postService.TogglePostVisibilityAsync(postVisibilityVM.PostId, loggedInUserId.Value);
 
             return RedirectToAction("Index");
         }
@@ -98,16 +120,19 @@ namespace DMVConnect.Controllers
         [HttpPost]
         public async Task<IActionResult> AddPostComment(PostCommentVM postCommentVM)
         {
+            var loggedInUserId = GetUserId();
+            if (loggedInUserId == null) return RedirectToLogin();
+
             var newComment = new Comment()
             {
                 PostId = postCommentVM.PostId,
-                UserId = loggedInUserId,
+                UserId = loggedInUserId.Value,
                 Content = postCommentVM.Content,
                 DateCreated = DateTime.Now,
                 DateUpdated = DateTime.Now
             };
 
-            await _postService.AddPostCommentAsync(newComment, loggedInUserId);
+            await _postService.AddPostCommentAsync(newComment, loggedInUserId.Value);
 
             return RedirectToAction("Index");
         }
@@ -115,7 +140,10 @@ namespace DMVConnect.Controllers
         [HttpPost]
         public async Task<IActionResult> AddPostReport(PostReportVM postReportVM)
         {
-            await _postService.ReportPostAsync(postReportVM.PostId, loggedInUserId);
+            var loggedInUserId = GetUserId();
+            if (loggedInUserId == null) return RedirectToLogin();
+
+            await _postService.ReportPostAsync(postReportVM.PostId, loggedInUserId.Value);
 
             return RedirectToAction("Index");
         }
