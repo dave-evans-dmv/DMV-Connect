@@ -30,12 +30,22 @@ namespace DMVConnect.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(RegisterVM registerVM)
         {
+            if (!ModelState.IsValid)
+                return View(registerVM);
+
             var newUser = new User
             {
                 UserName = registerVM.Email,
                 Email = registerVM.Email,
                 FullName = $"{registerVM.FirstName} {registerVM.LastName}"
             };
+
+            var existingUser = await _userManager.FindByEmailAsync(registerVM.Email);
+            if (existingUser != null) 
+            {
+                ModelState.AddModelError("Email", "Email already exists. Please login instead.");
+                return View(registerVM);
+            }
 
             var result = await _userManager.CreateAsync(newUser, registerVM.Password);
 
@@ -46,7 +56,12 @@ namespace DMVConnect.Controllers
                 return RedirectToAction("Index", "Home");
             }
 
-            return View();
+            foreach(var error in result.Errors)
+            {
+                ModelState.AddModelError("", error.Description);
+            }
+
+            return View(registerVM);
         }
 
         [HttpPost]
