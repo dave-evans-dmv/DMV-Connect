@@ -1,54 +1,57 @@
-﻿using DMVConnect.Data;
+﻿using DMVConnect.Controllers.Base;
 using DMVConnect.Data.Helpers.Enums;
 using DMVConnect.Data.Interfaces;
-using DMVConnect.Data.Services;
+using DMVConnect.Data.Models;
 using DMVConnect.ViewModels.Settings;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace DMVConnect.Controllers
 {
-    public class SettingsController : Controller
+    [Authorize]
+    public class SettingsController : BaseController
     {
         private readonly IUserService _userService;
         private readonly IFileService _fileService;
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
 
-        private int loggedInUserId = 2;
-
-        private int loggedInUser = 2;
-        public SettingsController(IUserService userService, IFileService fileService)
+        public SettingsController(
+            IUserService userService, 
+            IFileService fileService,
+            UserManager<User> userManager,
+            SignInManager<User> signInManager)
         {
             _userService = userService;
             _fileService = fileService;
+            _userManager = userManager;
+            _signInManager = signInManager;
         }
 
         public async Task<IActionResult> Index()
         {
-            var userDb = await _userService.GetUser(loggedInUser);
-            return View(userDb);
+            var loggedInUser = await _userManager.GetUserAsync(User);
+            return View(loggedInUser);
+        }
+
+        public async Task<IActionResult> NavigateToSettings()
+        {
+            return RedirectToAction("Index", "Settings");
         }
 
         [HttpPost]
         public async Task<IActionResult> UpdateProfilePicture(UpdateProfilePictureVM profilePictureVM)
         {
+            var loggedInUserId = GetUserId();
+            if (loggedInUserId == null) return RedirectToLogin();
+
             var uploadedProfilePictureUrl = await _fileService.UploadImageAsync(profilePictureVM.ProfilePicture, ImageFileType.ProfileImage);
 
-            await _userService.UpdateUserProfilePicture(loggedInUserId, uploadedProfilePictureUrl);
+            await _userService.UpdateUserProfilePicture(loggedInUserId.Value, uploadedProfilePictureUrl);
 
             return RedirectToAction("Index");
 
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> UpdateUserProfile(UpdateProfileVM profileVM)
-        {
-            return RedirectToAction("Index");
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> UpdateUserPassword(UpdatePasswordVM passwordVM)
-        {
-            return RedirectToAction("Index");
         }
     }
 }

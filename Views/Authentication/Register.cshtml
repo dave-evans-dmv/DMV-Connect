@@ -14,32 +14,38 @@
                         <label asp-for="FirstName">First Name</label>
                         <div class="mt-2.5">
                             <input asp-for="FirstName" id="firstName" name="firstName" type="text" placeholder="First Name" required class="!w-full" />
+                            <span asp-validation-for="FirstName" class="text-red-500 text-xs mt-1"></span>
                         </div>
                     </div>
                     <div>
                         <label asp-for="LastName">Last Name</label>
                         <div class="mt-2.5">
                             <input asp-for="LastName" id="lastName" name="lastName" type="text" placeholder="Last Name" required class="!w-full" />
+                            <span asp-validation-for="LastName" class="text-red-500 text-xs mt-1"></span>
                         </div>
                     </div>
                     <div class="col-span-2">
                         <label asp-for="Email">Email Address</label>
                         <div class="mt-2.5">
                             <input asp-for="Email" id="email" name="email" type="email" placeholder="Email" required class="!w-full" />
+                            <span asp-validation-for="Email" class="text-red-500 text-xs mt-1"></span>
                         </div>
                     </div>
                     <div class="col-span-2">
                         <label asp-for="Password">Password</label>
                         <div class="mt-2.5">
-                            <input asp-for="Password" id="password" name="password" type="password" placeholder="****" required class="!w-full" />
+                            <input asp-for="Password" id="password" name="password" type="password" placeholder="******" required class="!w-full" />
+                            <span asp-validation-for="Password" class="text-red-500 text-xs mt-1"></span>
                         </div>
                     </div>
                     <div class="col-span-2">
                         <label asp-for="ConfirmPassword">Confirm Password</label>
                         <div class="mt-2.5">
-                            <input asp-for="ConfirmPassword" id="confirmPassword" name="confirmPassword" type="password" placeholder="****" required class="!w-full" />
+                            <input asp-for="ConfirmPassword" id="confirmPassword" name="confirmPassword" type="password" placeholder="******" required class="!w-full" />
+                            <span asp-validation-for="ConfirmPassword" class="text-red-500 text-xs mt-1"></span>
                         </div>
                     </div>
+                    <div class="col-span-2 text-red-500 text-xs mt-1" asp-validation-summary="ModelOnly"></div>
                 </div>
                 <div>
                     <button type="submit" class="button bg-primary text-white w-full">Register</button>

@@ -1,19 +1,18 @@
-﻿using DMVConnect.Data;
+﻿using DMVConnect.Controllers.Base;
 using DMVConnect.Data.Helpers.Enums;
 using DMVConnect.Data.Interfaces;
 using DMVConnect.Data.Models;
 using DMVConnect.ViewModels.Stories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace DMVConnect.Controllers
 {
-    public class StoriesController : Controller
+    [Authorize]
+    public class StoriesController : BaseController
     {
         private readonly IStoriesService _storiesService;
         private readonly IFileService _fileService;
-
-        private int loggedInUserId = 2;
 
         public StoriesController(
             IStoriesService storiesService,
@@ -34,12 +33,15 @@ namespace DMVConnect.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateStory(StoryVM storyVM)
         {
+            var loggedInUserId = GetUserId();
+            if (loggedInUserId == null) return RedirectToLogin();
+
             var imageUploadPath = await _fileService.UploadImageAsync(storyVM.Image, ImageFileType.StoryImage);
 
             var newStory = new Story
             {
                 DateCreated = DateTime.Now,
-                UserId = loggedInUserId,
+                UserId = loggedInUserId.Value,
                 ImageUrl = imageUploadPath
             };
 

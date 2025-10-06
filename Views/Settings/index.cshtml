@@ -9,7 +9,7 @@
                 <form id="updateProfilePictureForm" asp-controller="Settings" asp-action="UpdateProfilePicture" enctype="multipart/form-data" class="flex items-center gap-4 w-full">
                     <div class="relative w-12 h-12 shrink-0">
                         <label class="cursor-pointer">
-                            <img id="profileImagePreview" src="@(Model.ProfilePictureUrl ?? "~/images/user-profile.svg")" class="object-cover w-full h-full rounded-full" alt="Profile Picture" />
+                            <img id="profileImagePreview" src="@(Model.ProfilePictureUrl ?? Url.Content("~/images/user-profile.svg"))" class="object-cover w-full h-full rounded-full" alt="Profile Picture" />
                             <input type="file" id="imageUpload" name="ProfilePicture" class="hidden" accept="image/png, image/jpeg" />
                         </label>
                         <label for="profileImageUpload" class="p-0.5 rounded-full bg-slate-600 border-white absolute -bottom-2 -right-2 cursor-pointer">
@@ -21,7 +21,7 @@
                     </div>
                     <div>
                         <h3 class="text-base font-semibold text-black">@Model.FullName</h3>
-                        <p class="text-sm text-blue-600 mt-1 font-normal">@@asdfsadf @*@Model.username*@</p>
+                        <p class="text-sm text-blue-600 mt-1 font-normal">@Model.Email</p>
                     </div>
                     <button type="submit" id="profileImageSaveButton" class="hidden button bg-blue-500 text-white px-4 py-1 rounded ml-auto">Save</button>
                 </form>
@@ -41,8 +41,14 @@
 
             <div id="setting_tab" class="uk-switcher py-12 px-20 overflow-hidden text-white text-sm">
                 <div>
-                    <form asp-action="UpdateUserProfile" asp-controller="Settings">
+                    <form asp-action="UpdateUserProfile" asp-controller="Authentication">
                         <div class="space-y-6">
+
+                            @if (TempData["ProfileSuccess"] != null)
+                            {
+                                <div class="text-green-500 mb-4">@TempData["ProfileSuccess"]</div>
+                            }
+
                             <div class="flex items-center gap-10">
                                 <label class="w-32 text-right">Full Name</label>
                                 <div class="flex-1">
@@ -52,21 +58,25 @@
                             <div class="flex items-center gap-10">
                                 <label class="w-32 text-right">Username</label>
                                 <div class="flex-1">
-                                    <input type="text" name="username" placeholder="Enter your Username" value="@@asdfasdf" class="w-full" />
+                                    <input type="text" name="username" placeholder="Enter your Username" value="@Model.UserName" class="w-full" />
                                 </div>
                             </div>
-                            <div class="flex items-center gap-10">
+                            @* <div class="flex items-center gap-10">
                                 <label class="w-32 text-right">Email</label>
                                 <div class="flex-1">
-                                    <input type="email" name="emailAddress" placeholder="Enter your Email" value="" class="w-full" />
+                                    <input type="email" name="Email" placeholder="Enter your Email" value="@Model.Email" class="w-full" />
                                 </div>
-                            </div>
+                            </div> *@
                             <div class="flex items-center gap-10">
-                                <label class="w-32 text-right">Email</label>
+                                <label class="w-32 text-right">Bio</label>
                                 <div class="flex-1">
-                                    <textarea name="bio" placeholder="Enter your bio" rows="5" class="w-full" ></textarea>
+                                    <textarea name="bio" placeholder="Enter your bio" rows="5" class="w-full" >@Model.Bio</textarea>
                                 </div>
                             </div>
+                            @if (TempData["UserProfileError"] != null)
+                            {
+                                <div class="text-red-500 mb-4">@Html.Raw(TempData["UserProfileError"])</div>
+                            }
                             <div class="flex justify-end items-center gap-4 mt-16 pl-[10.5rem]">
                                 <button class="button px-6 bg-secondary">Cancel</button>
                                 <button type="submit" class="button px-10 bg-primary !text-white">Save</button>
@@ -75,8 +85,14 @@
                     </form>
                 </div>
                 <div>
-                    <form asp-action="UpdateUserPassword" asp-controller="Settings">
+                    <form asp-action="UpdateUserPassword" asp-controller="Authentication">
                         <div class="space-y-6">
+
+                            @if (TempData["PasswordSuccess"] != null)
+                            {
+                                <div class="text-green-500 mb-4">@TempData["PasswordSuccess"]</div>
+                            }
+
                             <div class="flex items-center gap-10">
                                 <label class="w-32 text-right">Current Password</label>
                                 <div class="flex-1">
@@ -95,6 +111,10 @@
                                     <input type="password" name="confirmPassword" placeholder="Confirm your New Password" value="" class="w-full" />
                                 </div>
                             </div>
+                            @if (TempData["PasswordError"] != null)
+                            {
+                                <div class="text-red-500 mb-4">@Html.Raw(TempData["PasswordError"])</div>
+                            }
                             <div class="flex justify-end items-center gap-4 mt-16 pl-[10.5rem]">
                                 <button class="button px-6 bg-secondary">Cancel</button>
                                 <button type="submit" class="button px-10 bg-primary !text-white">Save</button>
@@ -124,6 +144,16 @@
             reader.readAsDataURL(file);
         } else {
             profileImageSaveButton.classList.add('hidden');
+        }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const switcher = UIkit.switcher(document.querySelector('[uk-switcher]'));
+        
+        if ('@TempData["ActiveTab"]' === 'Password') {
+            switcher.show(1);
+        } else {
+            switcher.show(0);
         }
     });
 </script>
