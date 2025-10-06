@@ -29,11 +29,11 @@
         }
         @* Post Heading *@
         <div class="flex gap-3 sm:p-4 p-2.5 text-sm font-medium">
-            <a>
+            <a asp-action="Details" asp-controller="Users" asp-route-userId="@Model.UserId">
                 <img src="@(Model.User.ProfilePictureUrl ?? Url.Content(defaultUserImage))" class="w-9 h-9 rounded-full" />
             </a>
             <div class="flex-1">
-                <a>
+                <a asp-action="Details" asp-controller="Users" asp-route-userId="@Model.UserId">
                     <h4 class="!text-black">@Model.User.FullName</h4>
                     <div class="text-xs !text-black" title="@Model.DateCreated.ToString("M/dd/yyyy hh:mm tt")">@displayTime</div>
                 </a>
@@ -126,17 +126,17 @@
         @* Comments *@
         <div>
             <div class="p-2.5 border-t border-gray-100 font-normal space-y-3 relative">
-                @foreach(var comment in Model.Comments.OrderByDescending(nameof => nameof.DateCreated).Take(showAllComments ? Model.Comments.Count : 2))
+                @foreach(var comment in Model.Comments.OrderByDescending(nameof => nameof.DateCreated).Take(showAllComments ? Model.Comments.Count : 4))
                 {
                     string displayCommentTime = GlobalHelpers.GetPostedTime(comment.DateCreated);
 
                     <div class="flex items-styart gap-3 relative">
-                        <a>
+                        <a asp-action="Details" asp-controller="Users" asp-route-userId="@comment.UserId">
                             <img alt="User Profile Image" src="@(comment.User.ProfilePictureUrl ?? Url.Content(defaultUserImage))" class="w-6 h-6 mt-1 rounded-full" />
                         </a>
                         <div class="flex-1">
                             <div class="flex justify-content-between">
-                                <a class="text-black font-medium inline-block flex-grow">
+                                <a class="text-black font-medium inline-block flex-grow" asp-action="Details" asp-controller="Users" asp-route-userId="@comment.UserId">
                                     @comment.User.FullName
                                 </a>
                                 <small class="!text-black">@displayCommentTime</small>
@@ -155,7 +155,7 @@
                         </div>
                     </div>
                 }
-                @if (Model.Comments.Count >= 3 && !showAllComments)
+                @if (Model.Comments.Count >= 5 && !showAllComments)
                 {
                     <div class="p-1.5">
                         <a class="!text-black" asp-controller="Home" asp-action="PostDetails" asp-route-postId="@Model.Id">
@@ -167,7 +167,7 @@
             <form class="add-comment-form" asp-controller="Home" asp-action="AddPostComment">
                 <input type="hidden" name="postId" value="@Model.Id" />
                 <div class="sm:px-4 sm:py-3 @(Model.Comments.Count > 0 ? "border-t" : "") border-gray-100 flex items-center gap-1">
-                    <a>
+                    <a asp-controller="Users" asp-action="Details" asp-route-userId="@loggedInUser.Id">
                         <img alt="User Profile Image" src="@(profilePicture ?? Url.Content(defaultUserImage))" class="w-6 h-6 rounded-full" />
                     </a>
                     <div class="flex-1 relative overflow-hidden h-10">
