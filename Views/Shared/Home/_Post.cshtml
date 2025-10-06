@@ -14,9 +14,9 @@
     string defaultUserImage = "~/images/user-profile.svg";
 
     bool showAllComments = ViewData["ShowAllComments"] as bool? ?? false;
+    bool showDetails = ViewData["ShowDetails"] as bool? ?? true;
     var loggedInUser = await UserManager.GetUserAsync(User);
     var profilePicture = loggedInUser?.ProfilePictureUrl;
-
 }
 @if ((!isPrivate || Model.UserId == USER_ID) && !isReported && Model.NrOfReports <= 3)
 {
@@ -104,9 +104,9 @@
                 <div class="!text-black">@Model.Likes.Count</div>
             </div>
             <div class="flex items-center gap-3 !text-black">
-                <div class="button-icon text-black">
+                <a asp-controller="Home" asp-action="PostDetails" asp-route-postId="@Model.Id" class="button-icon text-black">
                     <ion-icon class="text-lg" name="chatbubble-ellipses-outline"></ion-icon>
-                </div>
+                </a>
                 <div class="!text-black">@Model.Comments.Count</div>
             </div>
             <div class="ml-auto"></div>
@@ -123,8 +123,10 @@
                 }
             </div>
         </div>
-        @* Comments *@
-        <div>
+        @if (showDetails)
+        {
+            @* Comments *@
+            <div>
             <div class="p-2.5 border-t border-gray-100 font-normal space-y-3 relative">
                 @foreach(var comment in Model.Comments.OrderByDescending(nameof => nameof.DateCreated).Take(showAllComments ? Model.Comments.Count : 4))
                 {
@@ -177,5 +179,6 @@
                 </div>
             </form>
         </div>
+        }
     </div>
 }
