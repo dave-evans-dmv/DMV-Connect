@@ -6,9 +6,9 @@
             <div class="relative overflow-hidden w-full lg:h-8 h-8"></div>
             <div class="p-3 flex flex-row items-center">
                 <div class="flex-shrink-0 mr-4">
-                    <div class="relative lg:h-28 lg:w-28 w-28 -28">
-                        <div class="relative overflow-hidden rounded-full md:border-[6px] border-gray-100 shrink-0">
-                            <img src="@(Model.User.ProfilePictureUrl ?? Url.Content("~/images/user-profile.svg"))" alt="@Model.User.FullName Profile Picture" class="aspect-square"/>
+                    <div class="relative lg:h-28 lg:w-28 w-28 h-28">
+                        <div class="overflow-hidden rounded-full md:border-[6px] border-gray-100 shrink-0 relative aspect-square">
+                            <img src="@(Model.User.ProfilePictureUrl ?? Url.Content("~/images/user-profile.svg"))" alt="@Model.User.FullName Profile Picture" class="absolute w-full h-full inset-0 rounded-full object-cover shadow-sm" />
                         </div>
                     </div>
                 </div>

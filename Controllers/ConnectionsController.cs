@@ -1,7 +1,10 @@
 ﻿using DMVConnect.Controllers.Base;
+using DMVConnect.Data.Helpers.Constants;
 using DMVConnect.Data.Interfaces;
 using DMVConnect.Data.Services;
+using DMVConnect.ViewModels.Connections;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace DMVConnect.Controllers
 {
@@ -14,17 +17,71 @@ namespace DMVConnect.Controllers
             _connectionsService = connectionsService;
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
-
-        public IActionResult NavigateToConnections()
+        public async Task<IActionResult> Index()
         {
             var loggedInUserId = GetUserId();
             if (loggedInUserId == null) return RedirectToLogin();
 
-            return RedirectToAction("Index", "Connections");
+            var connectionData = new ConnectionVM()
+            {
+                Connections = await _connectionsService.GetConnectionsAsync(loggedInUserId.Value),
+                ConnectionRequestSent = await _connectionsService.GetSentConnectionsRequestAsync(loggedInUserId.Value),
+                ConnectionRequestReceived = await _connectionsService.GetReceivedConnectionsRequestAsync(loggedInUserId.Value),
+            };
+
+            return View(connectionData);
+        }
+
+        public async Task<IActionResult> NavigateToConnections()
+        {
+            var loggedInUserId = GetUserId();
+            if (loggedInUserId == null) return RedirectToLogin();
+
+            var connectionData = new ConnectionVM()
+            {
+                ConnectionRequestSent = await _connectionsService.GetSentConnectionsRequestAsync(loggedInUserId.Value)
+            };
+
+            return RedirectToAction("Index", "Connections", connectionData);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SendConnectionRequest(int receiverId)
+        {
+            var loggedInUserId = GetUserId();
+            if (loggedInUserId == null) return RedirectToLogin();
+
+            await _connectionsService.SendRequestAsync(loggedInUserId.Value, receiverId);
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CancelConnectionRequest(int requestId)
+        {
+            await _connectionsService.UpdateRequestAsync(requestId, ConnectionStatus.Canceled);
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AcceptConnectionRequest(int requestId)
+        {
+            await _connectionsService.UpdateRequestAsync(requestId, ConnectionStatus.Accepted);
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RejectConnectionRequest(int requestId)
+        {
+            await _connectionsService.UpdateRequestAsync(requestId, ConnectionStatus.Rejected);
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RemoveConnection(int connectionId )
+        {
+            await _connectionsService.RemoveConnectionAsync(connectionId);
+            return RedirectToAction("Index");
         }
     }
 }

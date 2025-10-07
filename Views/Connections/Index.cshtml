@@ -1,1 +1,112 @@
-﻿
+﻿@inject UserManager<User> UserManager;
+@model ConnectionVM
+
+<main id="site__main" class="2xl:ml-[--w-side] xl:ml-[--w-side-sm] p-2.5 h-[calc(100vh-var(--m-top))] mt-[--m-top]">
+    <div class="2xl:max-w-[1220px] max-w-[1065px] mx-auto">
+        @if (Model.ConnectionRequestReceived.Count > 0)
+        {
+            <div class="flex-items-center justify-between">
+                <div>
+                    <h2 class="text-lg text-base font-semibold !text-white">Received Requests</h2>
+                    <p class="font-normal text-sm text-gray-500 leading-6">See who wants to connect with you! Review and respond to incoming connection requests to expand your community.</p>
+                </div>
+            </div>
+
+            <div class="grid gap-3 grid-cols-2 mt-10">
+                @foreach (var request in Model.ConnectionRequestReceived)
+                {
+                    <div class="flex md:items-center space-x-4 p-4 rounded-md box">
+                        <div class="w-14 h-14 flex-shrink-0 rounded-lg relative">
+                            <img class="absolute w-full h-full inset-0 rounded-full object-cover shadow-sm" src="@(request.Sender.ProfilePictureUrl ?? Url.Content("~/images/user-profile.svg"))" alt="@request.Sender.FullName Profile Picture" />
+                        </div>
+
+                        <div class="flex-1">
+                            <a asp-controller="Users" asp-action="Details" asp-route-userId="@request.Sender.Id" class="text-base font-semibold capitalize text-white">@request.Sender.FullName</a>
+                        </div>
+
+                        <form asp-controller="Connections" asp-action="RejectConnectionRequest" asp-route-requestid="@request.Id">
+                            <button type="submit" class="button bg-red-600 !text-white gap-1 max-md:hidden ">
+                                <ion-icon name="remove-circle-outline" class="text-xl -ml-1"></ion-icon>
+                                Reject
+                            </button>
+                        </form>
+
+                        <form asp-controller="Connections" asp-action="AcceptConnectionRequest" asp-route-requestId="@request.Id">
+                            <button type="submit" class="button text-primary bg-primary-soft gap-1 max-md:hidden ">
+                                <ion-icon name="checkbox-outline" class="text-xl -ml-1"></ion-icon>
+                                Accept
+                            </button>
+                        </form>
+                    </div>
+                }
+            </div>
+        }
+
+        @if (Model.ConnectionRequestSent.Count > 0)
+        {
+            <div class="flex-items-center justify-between mt-10">
+                <div>
+                    <h2 class="text-lg text-base font-semibold !text-white">Pending Invitations</h2>
+                    <p class="font-normal text-sm text-gray-500 leading-6">Track the connection requests you've sent. See who hasn't responded yet and manage your pending invitations.</p>
+                </div>
+            </div>
+
+            <div class="grid gap-3 grid-cols-2 mt-10">
+                @foreach(var request in Model.ConnectionRequestSent)
+                {
+                    <div class="flex md:items-center space-x-4 p-4 rounded-md box">
+                        <div class="w-14 h-14 flex-shrink-0 rounded-lg relative">
+                            <img class="absolute w-full h-full inset-0 rounded-full object-cover shadow-sm" src="@(request.Receiver.ProfilePictureUrl ?? Url.Content("~/images/user-profile.svg"))" alt="@request.Receiver.FullName Profile Picture" />
+                        </div>
+
+                        <div class="flex-1">
+                            <a asp-controller="Users" asp-action="Details" asp-route-userId="@request.Receiver.Id" class="text-base font-semibold capitalize text-white">@request.Receiver.FullName</a>
+                        </div>
+
+                        <form asp-controller="Connections" asp-action="CancelConnectionRequest" asp-route-requestId="@request.Id">
+                            <button type="submit" class="button text-red-600 gap-1 max-md:hidden ">
+                                <ion-icon name="remove-circle-outline" class="text-xl -ml-1"></ion-icon>
+                                Cancel
+                            </button>
+                        </form>
+                    </div>
+                }
+            </div>
+        }
+ 
+        @if (Model.Connections.Count > 0)
+        {
+            <div class="flex-items-center justify-between mt-10">
+                <div>
+                    <h2 class="text-lg text-base font-semibold !text-white">My Connections</h2>
+                    <p class="font-normal text-sm text-gray-500 leading-6">Your personal network of DMV connections.</p>
+                </div>
+            </div>
+
+            <div class="grid gap-3 grid-cols-2 mt-10">
+                @foreach(var request in Model.Connections)
+                {
+                    var loggedInUser = await UserManager.GetUserAsync(User);
+                    var connection = request.SenderId == loggedInUser.Id ? request.Receiver : request.Sender;
+
+                    <div class="flex md:items-center space-x-4 p-4 rounded-md box">
+                        <div class="w-14 h-14 flex-shrink-0 rounded-lg relative">
+                            <img class="absolute w-full h-full inset-0 rounded-full object-cover shadow-sm" src="@(connection.ProfilePictureUrl ?? Url.Content("~/images/user-profile.svg"))" alt="@connection.FullName Profile Picture" />
+                        </div>
+
+                        <div class="flex-1">
+                            <a asp-controller="Users" asp-action="Details" asp-route-userId="@connection.Id" class="text-base font-semibold capitalize text-white">@connection.FullName</a>
+                        </div>
+
+                        <form asp-controller="Connections" asp-action="RemoveConnection" asp-route-requestId="@request.Id">
+                            <button type="submit" class="button text-red-600 gap-1 max-md:hidden ">
+                                <ion-icon name="remove-circle-outline" class="text-xl -ml-1"></ion-icon>
+                                Remove
+                            </button>
+                        </form>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</main>

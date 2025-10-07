@@ -58,14 +58,16 @@
                 </div>
 
                 @* Profile Icon *@
-                <div class="rounded-full relative bg-secondery cursor-pointer shrink-0">
-                    <img src="@(profilePicture ?? Url.Content("~/images/user-profile.svg"))" class="sm:w-9 sm:h-9 w-7 h-7 rounded-full shadow bg-white shrink-0" />
+                <div class="bg-secondery cursor-pointer h-7 overflow-hidden relative rounded-full shrink-0 w-7">
+                    <img src="@(profilePicture ?? Url.Content("~/images/user-profile.svg"))" class="absolute w-full h-full inset-0 rounded-full object-cover shadow-sm" alt="@username Profile Image"/>
                 </div>
                 <div class="hidden bg-white rounded-lg drop-shadow-xl w-64 border2" uk-drop="offset:6;pos: bottom-right;animate-out: true;">
 
                     <a>
-                        <div class="p-4 py-5 flex items-center gap-4">
-                            <img src="@(profilePicture ?? Url.Content("~/images/user-profile.svg"))" class="w-10 h-10 rounded-full shadow" />
+                        <div class="p-4 py-5 flex items-center gap-4 ">
+                            <div class="w-10 h-10 flex-shrink-0 rounded-lg relative">
+                                <img src="@(profilePicture ?? Url.Content("~/images/user-profile.svg"))" class="absolute w-full h-full inset-0 rounded-full object-cover shadow-sm" alt="@username Profile Picture" />
+                            </div>
                             <div class="flex-1">
                                 <h4 class="text-sm font-medium !text-black">@fullName</h4>
                                 <div class="text-sm mt-1 text-blue-700">@username</div>
