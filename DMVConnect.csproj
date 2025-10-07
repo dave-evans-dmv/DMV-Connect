@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Views\Shared\Sidebar\" />
     <Folder Include="wwwroot\images\posts\" />
     <Folder Include="wwwroot\images\profiles\" />
     <Folder Include="wwwroot\images\stories\" />

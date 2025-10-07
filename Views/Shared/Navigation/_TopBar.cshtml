@@ -31,7 +31,7 @@
                   class="mx-auto xl:w-[680px] sm:w-96 sm:relative rounded-xl overflow-hidden z-20 bg-secondery max-md:hidden w-screen right-0 max-sm:fixed max-sm:top-2">
 
                 <ion-icon name="search" class="absolute left-4 top-1/2 -translate-y-1/2"></ion-icon>
-                <input type="text" name="query" placeholder="Search Posts, Friends..." class="w-full !pl-10 !font-normal !bg-transparent h-12 !text-sm" />
+                <input type="text" name="query" placeholder="Search Posts, Connections..." class="w-full !pl-10 !font-normal !bg-transparent h-12 !text-sm" />
             </form>
         </div>
         <div class="max-w-[1220px] mx-auto flex items-center">
@@ -58,14 +58,16 @@
                 </div>
 
                 @* Profile Icon *@
-                <div class="rounded-full relative bg-secondery cursor-pointer shrink-0">
-                    <img src="@(profilePicture ?? Url.Content("~/images/user-profile.svg"))" class="sm:w-9 sm:h-9 w-7 h-7 rounded-full shadow bg-white shrink-0" />
+                <div class="bg-secondery cursor-pointer h-7 overflow-hidden relative rounded-full shrink-0 w-7">
+                    <img src="@(profilePicture ?? Url.Content("~/images/user-profile.svg"))" class="absolute w-full h-full inset-0 rounded-full object-cover shadow-sm" alt="@username Profile Image"/>
                 </div>
                 <div class="hidden bg-white rounded-lg drop-shadow-xl w-64 border2" uk-drop="offset:6;pos: bottom-right;animate-out: true;">
 
-                    <a>
-                        <div class="p-4 py-5 flex items-center gap-4">
-                            <img src="@(profilePicture ?? Url.Content("~/images/user-profile.svg"))" class="w-10 h-10 rounded-full shadow" />
+                    <a asp-action="Details" asp-controller="Users" asp-route-userId="@loggedInUser.Id">
+                        <div class="p-4 py-5 flex items-center gap-4 ">
+                            <div class="w-10 h-10 flex-shrink-0 rounded-lg relative">
+                                <img src="@(profilePicture ?? Url.Content("~/images/user-profile.svg"))" class="absolute w-full h-full inset-0 rounded-full object-cover shadow-sm" alt="@username Profile Picture" />
+                            </div>
                             <div class="flex-1">
                                 <h4 class="text-sm font-medium !text-black">@fullName</h4>
                                 <div class="text-sm mt-1 text-blue-700">@username</div>

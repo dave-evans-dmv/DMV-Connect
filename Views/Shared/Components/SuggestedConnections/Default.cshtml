@@ -1,0 +1,28 @@
+﻿@model List<UserWithConnectionsCountVM>
+
+<div class="flex items-baseline justify-between text-black">
+    <h3 class="font-bold text-base">Connections you may know</h3>
+</div>
+
+<div class="side-list">
+    @foreach(var suggestedConnection in Model)
+    {
+        <div class="side-list-item">
+            <a asp-controller="Users" asp-action="Details" asp-route-userId="@suggestedConnection.UserId" class="w-14 h-14 flex-shrink-0 rounded-full relative">
+                <img src="@(suggestedConnection.ProfilePictureUrl ?? Url.Content("~/images/user-profile.svg"))" class="absolute w-full h-full inset-0 rounded-full object-cover shadow-sm" />
+            </a>
+            <div class="flex-1">
+                <a>
+                    <h4 class="side-list-title">
+                        @suggestedConnection.FullName
+                    </h4>
+                </a>
+                <div class="side-list-info">@suggestedConnection.ConnectionCountDisplay</div>
+            </div>
+            <form asp-action="SendConnectionRequest" asp-controller="Connections" method="post">
+                <input type="hidden" name="receiverId" value="@suggestedConnection.UserId" />
+                <button type="submit" class="button bg-primary-soft text-primary">Follow</button>
+            </form>
+        </div>
+    }
+</div>
