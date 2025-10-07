@@ -24,14 +24,14 @@
                             <a asp-controller="Users" asp-action="Details" asp-route-userId="@request.Sender.Id" class="text-base font-semibold capitalize text-white">@request.Sender.FullName</a>
                         </div>
 
-                        <form asp-controller="Connections" asp-action="RejectConnectionRequest" asp-route-requestid="@request.Id">
+                        <form asp-controller="Connections" asp-action="UpdateConnectionRequest" asp-route-requestId="@request.Id" asp-route-status="@ConnectionStatus.Rejected">
                             <button type="submit" class="button bg-red-600 !text-white gap-1 max-md:hidden ">
                                 <ion-icon name="remove-circle-outline" class="text-xl -ml-1"></ion-icon>
                                 Reject
                             </button>
                         </form>
 
-                        <form asp-controller="Connections" asp-action="AcceptConnectionRequest" asp-route-requestId="@request.Id">
+                        <form asp-controller="Connections" asp-action="UpdateConnectionRequest" asp-route-requestId="@request.Id" asp-route-status="@ConnectionStatus.Accepted">
                             <button type="submit" class="button text-primary bg-primary-soft gap-1 max-md:hidden ">
                                 <ion-icon name="checkbox-outline" class="text-xl -ml-1"></ion-icon>
                                 Accept
@@ -63,7 +63,7 @@
                             <a asp-controller="Users" asp-action="Details" asp-route-userId="@request.Receiver.Id" class="text-base font-semibold capitalize text-white">@request.Receiver.FullName</a>
                         </div>
 
-                        <form asp-controller="Connections" asp-action="CancelConnectionRequest" asp-route-requestId="@request.Id">
+                        <form asp-controller="Connections" asp-action="UpdateConnectionRequest" asp-route-requestId="@request.Id" asp-route-status="@ConnectionStatus.Canceled">
                             <button type="submit" class="button text-red-600 gap-1 max-md:hidden ">
                                 <ion-icon name="remove-circle-outline" class="text-xl -ml-1"></ion-icon>
                                 Cancel
@@ -98,8 +98,8 @@
                             <a asp-controller="Users" asp-action="Details" asp-route-userId="@connection.Id" class="text-base font-semibold capitalize text-white">@connection.FullName</a>
                         </div>
 
-                        <form asp-controller="Connections" asp-action="RemoveConnection" asp-route-requestId="@request.Id">
-                            <button type="submit" class="button text-red-600 gap-1 max-md:hidden ">
+                        <form>
+                            <button type="button" class="button text-red-600 gap-1 max-md:hidden " onclick="openConnectionRemoveModal(@request.Id)">
                                 <ion-icon name="remove-circle-outline" class="text-xl -ml-1"></ion-icon>
                                 Remove
                             </button>
@@ -110,3 +110,11 @@
         }
     </div>
 </main>
+
+<partial name="Connections/_ConnectionRemoveModal" />
+<script>
+    function openConnectionRemoveModal(connectionId) {
+        document.querySelector('#connectionRemoveModalConnectionId').value = connectionId;
+        UIkit.modal('#connectionRemoveModal').show();
+    }
+</script>

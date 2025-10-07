@@ -57,30 +57,16 @@ namespace DMVConnect.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CancelConnectionRequest(int requestId)
-        {
-            await _connectionsService.UpdateRequestAsync(requestId, ConnectionStatus.Canceled);
-            return RedirectToAction("Index");
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> AcceptConnectionRequest(int requestId)
-        {
-            await _connectionsService.UpdateRequestAsync(requestId, ConnectionStatus.Accepted);
-            return RedirectToAction("Index");
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> RejectConnectionRequest(int requestId)
-        {
-            await _connectionsService.UpdateRequestAsync(requestId, ConnectionStatus.Rejected);
-            return RedirectToAction("Index");
-        }
-
-        [HttpPost]
         public async Task<IActionResult> RemoveConnection(int connectionId )
         {
             await _connectionsService.RemoveConnectionAsync(connectionId);
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateConnectionRequest(int requestId, string status)
+        {
+            await _connectionsService.UpdateRequestAsync(requestId, status);
             return RedirectToAction("Index");
         }
     }

@@ -1,4 +1,5 @@
-﻿@model GetUserProfileVM
+﻿@inject UserManager<User> UserManager;
+@model GetUserProfileVM
 
 <main id="site__main" class="2xl:ml-[--w-side] xl:ml-[--w-side-sm] p-2.5 h=[calc(100vh-var(--m-top))] mt-[--m-top]">
     <div class="max-w-[1055px] mx-auto max-lg:-m-2.5">
@@ -37,27 +38,24 @@
 
                             <h3 class="font-bold text-lg">
                                 Connections
-                                <span class="block text-sm text-gray-500 mt-0. font-normal"> 20 connections </span>
+                                <span class="block text-sm text-gray-500 mt-0. font-normal"> @Model.ConnectionCountDisplay </span>
                             </h3>
 
                         </div>
 
                         <div class="grid grid-cols-3 gap-2 gap-y-5 text-center text-sm mt-4 mb-2">
-                            <div>
-                                <div class="relative w-full aspect-square rounded-lg overflow-hidden">
-                                    <img src="~/images/user-profile.svg" class="object-cover w-full h-full inset-0" />
-                                </div>
+                            @foreach (var result in Model.Connections)
+                            {
+                                var loggedInUser = await UserManager.GetUserAsync(User);
+                                var connection = result.SenderId == Model.User.Id ? result.Receiver : result.Sender;
+                                <a asp-action="Details" asp-controller="Users" asp-route-userId="@connection.Id">
+                                    <div class="relative w-full aspect-square rounded-lg overflow-hidden">
+                                        <img src="@(connection.ProfilePictureUrl ?? Url.Content("~/images/user-profile.svg"))" class="object-cover w-full h-full inset-0 rounded-full" alt="@connection.FullName Profile Picture" />
+                                    </div>
 
-                                <div class="mt-2 line-clamp-1">User 1</div>
-                            </div>
-
-                            <div>
-                                <div class="relative w-full aspect-square rounded-lg overflow-hidden">
-                                    <img src="~/images/user-profile.svg" class="object-cover w-full h-full inset-0" />
-                                </div>
-
-                                <div class="mt-2 line-clamp-1">User 2</div>
-                            </div>
+                                    <div class="mt-2 line-clamp-1">@connection.FullName</div>
+                                </a>
+                            }
                         </div>
                     </div>
                 </div>

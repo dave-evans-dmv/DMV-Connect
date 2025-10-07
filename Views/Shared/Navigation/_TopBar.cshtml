@@ -63,7 +63,7 @@
                 </div>
                 <div class="hidden bg-white rounded-lg drop-shadow-xl w-64 border2" uk-drop="offset:6;pos: bottom-right;animate-out: true;">
 
-                    <a>
+                    <a asp-action="Details" asp-controller="Users" asp-route-userId="@loggedInUser.Id">
                         <div class="p-4 py-5 flex items-center gap-4 ">
                             <div class="w-10 h-10 flex-shrink-0 rounded-lg relative">
                                 <img src="@(profilePicture ?? Url.Content("~/images/user-profile.svg"))" class="absolute w-full h-full inset-0 rounded-full object-cover shadow-sm" alt="@username Profile Picture" />
