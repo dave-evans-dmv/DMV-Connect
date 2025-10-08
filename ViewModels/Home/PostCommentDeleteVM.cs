@@ -4,6 +4,7 @@ namespace DMVConnect.ViewModels.Home
 {
     public class PostCommentDeleteVM
     {
-        public int commentId { get; set; }
+        public int CommentId { get; set; }
+        public int PostId { get; set; }
     }
 }
