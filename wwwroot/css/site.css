@@ -68,3 +68,7 @@ button.icon-link-no-form.icon-link > ion-icon {
     opacity: .5;
     text-decoration: none;
 }
+
+ion-icon {
+    pointer-events: none;
+}

@@ -3,6 +3,7 @@ using DMVConnect.Data.Helpers;
 using DMVConnect.Data.Interfaces;
 using DMVConnect.Data.Models;
 using DMVConnect.Data.Services;
+using DMVConnect.HUBs;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -45,6 +46,8 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddAuthorization();
 
+builder.Services.AddSignalR();
+
 var app = builder.Build();
 
 // Seed DB with initial data
@@ -78,5 +81,7 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.Run();

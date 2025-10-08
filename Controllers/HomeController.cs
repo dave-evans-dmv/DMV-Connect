@@ -85,6 +85,7 @@ namespace DMVConnect.Controllers
         }
 
         [HttpPost]
+        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> TogglePostLike(PostLikeVM postLikeVM)
         {
             var loggedInUserId = GetUserId();
@@ -92,10 +93,13 @@ namespace DMVConnect.Controllers
 
             await _postService.TogglePostLikeAsync(postLikeVM.PostId, loggedInUserId.Value);
 
-            return RedirectToAction("Index");
+            var post = await _postService.GetPostByIdAsync(postLikeVM.PostId);
+
+            return PartialView("Home/_Post", post);
         }
 
         [HttpPost]
+        //[ValidateAntiForgeryToken]
         public async Task<IActionResult> TogglePostFavorite(PostFavoriteVM postFavoriteVM)
         {
             var loggedInUserId = GetUserId();
@@ -103,7 +107,9 @@ namespace DMVConnect.Controllers
 
             await _postService.TogglePostFavoriteAsync(postFavoriteVM.PostId, loggedInUserId.Value);
 
-            return RedirectToAction("Index");
+            var post = await _postService.GetPostByIdAsync(postFavoriteVM.PostId);
+
+            return PartialView("Home/_Post", post);
         }
 
         [HttpPost]
@@ -118,6 +124,7 @@ namespace DMVConnect.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddPostComment(PostCommentVM postCommentVM)
         {
             var loggedInUserId = GetUserId();
@@ -134,7 +141,9 @@ namespace DMVConnect.Controllers
 
             await _postService.AddPostCommentAsync(newComment, loggedInUserId.Value);
 
-            return RedirectToAction("Index");
+            var post = await _postService.GetPostByIdAsync(postCommentVM.PostId);
+
+            return PartialView("Home/_Post", post);
         }
 
         [HttpPost]
@@ -149,11 +158,14 @@ namespace DMVConnect.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> RemovePostComment(PostCommentDeleteVM postCommentDeleteVM)
         {
-            await _postService.RemovePostCommentAsync(postCommentDeleteVM.commentId);
+            await _postService.RemovePostCommentAsync(postCommentDeleteVM.CommentId);
 
-            return RedirectToAction("Index");
+            var post = await _postService.GetPostByIdAsync(postCommentDeleteVM.PostId);
+
+            return PartialView("Home/_Post", post);
         }
 
         [HttpPost]
