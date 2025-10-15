@@ -1,10 +1,14 @@
 using DMVConnect.Controllers.Base;
+using DMVConnect.Data.Helpers.Constants;
 using DMVConnect.Data.Helpers.Enums;
 using DMVConnect.Data.Interfaces;
 using DMVConnect.Data.Models;
 using DMVConnect.ViewModels.Home;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using System.DirectoryServices.ActiveDirectory;
+using System.Runtime.InteropServices;
 
 namespace DMVConnect.Controllers
 {
@@ -15,17 +19,20 @@ namespace DMVConnect.Controllers
         private readonly IPostService _postService;
         private readonly IFileService _fileService;
         private readonly IHashtagService _hashtagService;
+        private readonly INotificationService _notificationService;
 
         public HomeController(
             ILogger<HomeController> logger, 
             IPostService postService,
             IHashtagService hastagService,
-            IFileService fileService)
+            IFileService fileService,
+            INotificationService notificationService)
         {
             _logger = logger;
             _postService = postService;
             _hashtagService = hastagService;
             _fileService = fileService;
+            _notificationService = notificationService;
         }
 
         public async Task<IActionResult> Index()
@@ -85,29 +92,35 @@ namespace DMVConnect.Controllers
         }
 
         [HttpPost]
-        //[ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> TogglePostLike(PostLikeVM postLikeVM)
         {
             var loggedInUserId = GetUserId();
+            var userName = GetUserFullName();
             if (loggedInUserId == null) return RedirectToLogin();
 
-            await _postService.TogglePostLikeAsync(postLikeVM.PostId, loggedInUserId.Value);
-
+            var result = await _postService.TogglePostLikeAsync(postLikeVM.PostId, loggedInUserId.Value);
             var post = await _postService.GetPostByIdAsync(postLikeVM.PostId);
+
+            if (result.SendNotification)
+                await _notificationService.AddNewNotificationAsync(post.UserId, loggedInUserId.Value, NotificationText.NotificationTypeLike, userName, post.Id);
 
             return PartialView("Home/_Post", post);
         }
 
         [HttpPost]
-        //[ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> TogglePostFavorite(PostFavoriteVM postFavoriteVM)
         {
             var loggedInUserId = GetUserId();
+            var userName = GetUserFullName();
             if (loggedInUserId == null) return RedirectToLogin();
 
-            await _postService.TogglePostFavoriteAsync(postFavoriteVM.PostId, loggedInUserId.Value);
-
+            var result = await _postService.TogglePostFavoriteAsync(postFavoriteVM.PostId, loggedInUserId.Value);
             var post = await _postService.GetPostByIdAsync(postFavoriteVM.PostId);
+
+            if (result.SendNotification)
+                await _notificationService.AddNewNotificationAsync(post.UserId, loggedInUserId.Value, NotificationText.NotificationTypeBookmark, userName, postFavoriteVM.PostId);
 
             return PartialView("Home/_Post", post);
         }
@@ -128,6 +141,7 @@ namespace DMVConnect.Controllers
         public async Task<IActionResult> AddPostComment(PostCommentVM postCommentVM)
         {
             var loggedInUserId = GetUserId();
+            var userName = GetUserFullName();
             if (loggedInUserId == null) return RedirectToLogin();
 
             var newComment = new Comment()
@@ -139,9 +153,11 @@ namespace DMVConnect.Controllers
                 DateUpdated = DateTime.Now
             };
 
-            await _postService.AddPostCommentAsync(newComment, loggedInUserId.Value);
-
+            var result = await _postService.AddPostCommentAsync(newComment, loggedInUserId.Value);
             var post = await _postService.GetPostByIdAsync(postCommentVM.PostId);
+
+            if (result.SendNotification)
+                await _notificationService.AddNewNotificationAsync(post.UserId, loggedInUserId.Value, NotificationText.NotificationTypeComment, userName, post.Id);
 
             return PartialView("Home/_Post", post);
         }
@@ -150,9 +166,13 @@ namespace DMVConnect.Controllers
         public async Task<IActionResult> AddPostReport(PostReportVM postReportVM)
         {
             var loggedInUserId = GetUserId();
+            var userName = GetUserFullName();
             if (loggedInUserId == null) return RedirectToLogin();
 
-            await _postService.ReportPostAsync(postReportVM.PostId, loggedInUserId.Value);
+            var result = await _postService.ReportPostAsync(postReportVM.PostId, loggedInUserId.Value);
+
+            if (result.SendNotification)
+                await _notificationService.AddNewNotificationAsync(postReportVM.UserId, loggedInUserId.Value, NotificationText.NotificationTypeReport, userName, postReportVM.PostId);
 
             return RedirectToAction("Index");
         }
@@ -161,7 +181,8 @@ namespace DMVConnect.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RemovePostComment(PostCommentDeleteVM postCommentDeleteVM)
         {
-            await _postService.RemovePostCommentAsync(postCommentDeleteVM.CommentId);
+            var loggedInUserId = GetUserId();
+            await _postService.RemovePostCommentAsync(postCommentDeleteVM.CommentId, loggedInUserId.Value);
 
             var post = await _postService.GetPostByIdAsync(postCommentDeleteVM.PostId);
 

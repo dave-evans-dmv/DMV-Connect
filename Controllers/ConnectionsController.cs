@@ -1,20 +1,21 @@
 ﻿using DMVConnect.Controllers.Base;
 using DMVConnect.Data.Helpers.Constants;
 using DMVConnect.Data.Interfaces;
-using DMVConnect.Data.Services;
 using DMVConnect.ViewModels.Connections;
 using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace DMVConnect.Controllers
 {
     public class ConnectionsController : BaseController
     {
         public readonly IConnectionsService _connectionsService;
+        private readonly INotificationService _notificationService;
 
-        public ConnectionsController(IConnectionsService connectionsService)
+        public ConnectionsController(
+            IConnectionsService connectionsService, INotificationService notificationService)
         {
             _connectionsService = connectionsService;
+            _notificationService = notificationService;
         }
 
         public async Task<IActionResult> Index()
@@ -49,9 +50,12 @@ namespace DMVConnect.Controllers
         public async Task<IActionResult> SendConnectionRequest(int receiverId)
         {
             var loggedInUserId = GetUserId();
+            var userName = GetUserFullName();
             if (loggedInUserId == null) return RedirectToLogin();
 
             await _connectionsService.SendRequestAsync(loggedInUserId.Value, receiverId);
+
+            await _notificationService.AddNewNotificationAsync(receiverId, loggedInUserId.Value, NotificationText.NotificationTypeConnectionRequest, userName, null);
 
             return RedirectToAction("Index", "Home");
         }
@@ -66,7 +70,17 @@ namespace DMVConnect.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateConnectionRequest(int requestId, string status)
         {
-            await _connectionsService.UpdateRequestAsync(requestId, status);
+            var userId = GetUserId();
+            var userName = GetUserFullName();
+            if (!userId.HasValue) RedirectToLogin();
+
+            var request = await _connectionsService.UpdateRequestAsync(requestId, status);
+
+            if (status == ConnectionStatus.Accepted)
+            {
+                await _notificationService.AddNewNotificationAsync(request.SenderId, userId.Value, NotificationText.NotificationTypeAcceptedConnection, userName, null);
+            }
+
             return RedirectToAction("Index");
         }
     }

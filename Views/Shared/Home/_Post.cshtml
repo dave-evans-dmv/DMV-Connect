@@ -96,7 +96,7 @@
         <div class="sm:p-4 p-2.5 flex items-center gap-4 text-xs font-semibold">
             <div class="flex items-center gap-2.5 ">
                 <form asp-controller="Home" asp-action="TogglePostLike">
-                    @* @Html.AntiForgeryToken() *@
+                    @Html.AntiForgeryToken()
                     <input type="hidden" name="postId" value="@Model.Id" />
                     <button type="submit" class="button-icon like-button @(isLiked ? " text-red-500 bg-red-100" : "text-black")">
                         <ion-icon class="text-lg" name="@(isLiked ? "heart" : "heart-outline")"></ion-icon>
@@ -113,7 +113,7 @@
             <div class="ml-auto"></div>
             <div class="flex items-center gap-2">
                 <form asp-controller="Home" asp-action="TogglePostFavorite">
-                    @* @Html.AntiForgeryToken() *@
+                    @Html.AntiForgeryToken()
                     <input type="hidden" name="postId" value="@Model.Id" />
                     <button type="submit" class="button-icon favorite-button ml-auto @(isFavorited ? " text-orange-500 !bt-orange-100" : "text-black")">
                         <ion-icon class="text-lg" name="@(isFavorited ? "bookmark" : "bookmark-outline")"></ion-icon>
@@ -149,14 +149,17 @@
                                 <p class="mt-0.5 !text-black">
                                     @comment.Content
                                 </p>
-                                <form class="remove-comment-form" asp-controller="Home" asp-action="RemovePostComment">
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="commentId" value="@comment.Id" />
-                                    <input type="hidden" name="postId" value="@comment.PostId" />
-                                    <button type="submit" class="text-red-500 text-xs ml-2" title="Remove post comment">
-                                        <ion-icon name="trash-outline"></ion-icon>
-                                    </button>
-                                </form>
+                                @if (comment.UserId == loggedInUser.Id)
+                                {
+                                    <form class="remove-comment-form" asp-controller="Home" asp-action="RemovePostComment">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="commentId" value="@comment.Id" />
+                                        <input type="hidden" name="postId" value="@comment.PostId" />
+                                        <button type="submit" class="text-red-500 text-xs ml-2" title="Remove post comment">
+                                            <ion-icon name="trash-outline"></ion-icon>
+                                        </button>
+                                    </form>
+                                }
                             </div>
                         </div>
                     </div>

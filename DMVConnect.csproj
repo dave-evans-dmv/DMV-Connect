@@ -1,14 +1,20 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>DMVConnect</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Views\Shared\Sidebar\" />
+    <Compile Remove="Views\Shared\Sidebar\**" />
+    <Content Remove="Views\Shared\Sidebar\**" />
+    <EmbeddedResource Remove="Views\Shared\Sidebar\**" />
+    <None Remove="Views\Shared\Sidebar\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Folder Include="wwwroot\images\posts\" />
     <Folder Include="wwwroot\images\profiles\" />
     <Folder Include="wwwroot\images\stories\" />
@@ -25,6 +31,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Identity.Core" Version="8.0.20" />
+    <PackageReference Include="Microsoft.Windows.Compatibility" Version="10.0.0-rc.1.25451.107" />
   </ItemGroup>
 
   <ItemGroup>

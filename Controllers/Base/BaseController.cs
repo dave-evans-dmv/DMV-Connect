@@ -15,6 +15,11 @@ namespace DMVConnect.Controllers.Base
             return int.Parse(loggedInUserId);
         }
 
+        protected string? GetUserFullName()
+        {
+            return User.FindFirstValue(ClaimTypes.Name);
+        }
+
         protected IActionResult RedirectToLogin()
         {
             return RedirectToAction("Login", "Authentication");

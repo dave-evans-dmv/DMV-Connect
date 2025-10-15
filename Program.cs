@@ -3,8 +3,7 @@ using DMVConnect.Data.Helpers;
 using DMVConnect.Data.Interfaces;
 using DMVConnect.Data.Models;
 using DMVConnect.Data.Services;
-using DMVConnect.HUBs;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using DMVConnect.Data.Hubs;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,6 +17,7 @@ var dbConnectionString = builder.Configuration.GetConnectionString("Default");
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(dbConnectionString));
 
 // Services Config
+builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IPostService, PostService>();
 builder.Services.AddScoped<IHashtagService, HashtagService>();
 builder.Services.AddScoped<IStoriesService, StoriesService>();
