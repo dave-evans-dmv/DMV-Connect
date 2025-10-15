@@ -44,10 +44,10 @@
                     </svg>
                     <div class="absolute top-0 right-0 -m-1 bg-red-600 text-white text-xs px-1 rounded-full" id="notificationsCount">0</div>
                 </button>
-                <div class="hidden bg-white pr-1.5 rounded-lg drop-shadow-xl md:w-[365px] w-screen border2" uk-drop="offset:6;pos: bottom-right; mode: click; animate-out: true;">
+                <div class="hidden bg-white pr-1.5 rounded-lg drop-shadow-xl md:w-[520px] w-screen border2" uk-drop="offset:6;pos: bottom-right; mode: click; animate-out: true;">
 
                     <div class="flex items-center justify-between gap-2 p-4 pb-2">
-                        <h3 class="font-bold text-xl">Notifications</h3>
+                        <h3 class="font-bold text-xl !text-black">Notifications</h3>
                     </div>
 
                     <div class="text-sm h-[400px] w-full overflow-y-auto pr-2">
@@ -89,3 +89,74 @@
         </div>
     </div>
 </header>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/aspnet-signalr/1.0.27/signalr.min.js" integrity="sha512-a+73ErrZPjhqOu0qbW1QLsenEF4pvDjmnd+Ws6hkDyJlrwAigOQAxQhIT+fPNFWScUvtJQvn+G535TT2C6/G4g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+        fetch("/Notifications/GetCount", {
+            method: 'GET',
+            headers: {
+                'Content-Type':'application/json'
+            }
+        }).then(response => response.json())
+        .then(data => {
+            document.getElementById("notificationsCount").innerHTML = data;
+        })
+        .catch(error => {
+            console.error("Error fetching notification count: ", error);
+        })
+
+        document.getElementById('notificationsBtn').addEventListener('click', () => {
+            fetch('/Notifications/GetNotifications')
+                .then(res => res.text())
+                .then(html=> {
+                    if(html.length > 5 )
+                        document.getElementById('notification-dropdown').innerHTML = html;
+                })
+        })
+
+        //SignalR connection
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/notificationHub")
+            .build();
+
+        connection.on("@NotificationText.ReceiveNotification", (message) => {
+            document.getElementById("notificationsCount").innerHTML = message;
+        });
+
+        connection.start()
+            .then(() => console.log("@NotificationText.SignalRConnected"))
+            .catch((err) => console.log("@NotificationText.SignalRError", err))
+    })
+
+
+    function setNotificationAsRead(notificationId) {
+        fetch(`/Notifications/SetNotificationAsRead?notificationId=${notificationId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(resp => resp.text())
+            .then(html => {
+                if(html.length > 5 )
+                    document.getElementById('notification-dropdown').innerHTML = html;
+            })
+    }
+
+    function removeNotification(notificationId) {
+        fetch(`/Notifications/RemoveNotification?notificationId=${notificationId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(resp => resp.text())
+            .then(html => {
+                if(html.length > 5 )
+                    html = "<p>No Notifications...</p>";
+                document.getElementById('notification-dropdown').innerHTML = html;
+            })
+    }
+</script>

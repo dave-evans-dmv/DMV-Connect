@@ -1,0 +1,41 @@
+﻿@model List<Notification>
+
+@foreach (var notification in Model)
+{
+    string iconName = notification.Type switch
+    {
+        NotificationText.NotificationTypeLike => "heart-outline",
+        NotificationText.NotificationTypeComment => "chatbubble-ellipses-outline",
+        NotificationText.NotificationTypeConnectionRequest => "person-add-outline",
+        NotificationText.NotificationTypeBookmark => "bookmark-outline",
+        NotificationText.NotificationTypeReport => "flag-outline",
+        _ => "notifications-outline"
+    };
+
+    string redirectUrl = notification.Type switch
+    {
+        NotificationText.NotificationTypeConnectionRequest => Url.Action("Index", "Connections"),
+        NotificationText.NotificationTypeAcceptedConnection => Url.Action("Details", "Users", new { userId = notification.SenderUserId }),
+        NotificationText.NotificationTypeLike => Url.Action("PostDetails", "Home", new { postId = notification.PostId }),
+        NotificationText.NotificationTypeComment => Url.Action("PostDetails", "Home", new { postId = notification.PostId }),
+        NotificationText.NotificationTypeBookmark => Url.Action("PostDetails", "Home", new { postId = notification.PostId }),
+        NotificationText.NotificationTypeReport => Url.Action("PostDetails", "Home", new { postId = notification.PostId }),
+        _ => "#"
+    };
+    <div class="relative flex items-center gap-3 p-2 duration-200 rounded-xl pr-10 mt-1 hover:bg-slate-100 @(notification.IsRead ? "" : "bg-sky-100")">
+        <div class="flex-1">
+            @if (notification.IsRead == false)
+            {
+                <div class="w-3.5 h-3.5 bg-teal-600 rounded-full absolute left-0 top-0 cursor-pointer"></div>
+            }
+            <a class="flex" href="@redirectUrl" onclick="setNotificationAsRead(@notification.Id)">
+                <ion-icon name="@iconName" class="text-primary text-lg ml-1 mr-1"></ion-icon>
+                <p>
+                    <b class="font-bold mr-1">@notification.Message</b>
+                </p>
+            </a>
+            <div onclick="removeNotification(@notification.Id)" class="cursor-pointer text-primary text-lg absolute right-0 mr-3 top-3"><ion-icon name="close-outline"></ion-icon></div>
+            <div class="text-xs text-gray-500 mt-1.5 ml-1">@GlobalHelpers.GetPostedTime(@notification.DateCreated)</div>
+        </div>
+    </div>
+}
