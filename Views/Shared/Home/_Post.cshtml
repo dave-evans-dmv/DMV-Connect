@@ -29,8 +29,8 @@
         }
         @* Post Heading *@
         <div class="flex gap-3 sm:p-4 p-2.5 text-sm font-medium">
-            <a asp-action="Details" asp-controller="Users" asp-route-userId="@Model.UserId">
-                <img src="@(Model.User.ProfilePictureUrl ?? Url.Content(defaultUserImage))" class="w-9 h-9 rounded-full" />
+            <a asp-action="Details" asp-controller="Users" asp-route-userId="@Model.UserId" class="w-9 h-9 flex-shrink-0 rounded-full relative">
+                <img src="@(Model.User.ProfilePictureUrl ?? Url.Content(defaultUserImage))" class="absolute w-full h-full inset-0 rounded-full object-cover shadow-sm" />
             </a>
             <div class="flex-1">
                 <a asp-action="Details" asp-controller="Users" asp-route-userId="@Model.UserId">

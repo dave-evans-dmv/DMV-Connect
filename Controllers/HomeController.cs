@@ -6,9 +6,6 @@ using DMVConnect.Data.Models;
 using DMVConnect.ViewModels.Home;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
-using System.DirectoryServices.ActiveDirectory;
-using System.Runtime.InteropServices;
 
 namespace DMVConnect.Controllers
 {
@@ -169,10 +166,7 @@ namespace DMVConnect.Controllers
             var userName = GetUserFullName();
             if (loggedInUserId == null) return RedirectToLogin();
 
-            var result = await _postService.ReportPostAsync(postReportVM.PostId, loggedInUserId.Value);
-
-            if (result.SendNotification)
-                await _notificationService.AddNewNotificationAsync(postReportVM.UserId, loggedInUserId.Value, NotificationText.NotificationTypeReport, userName, postReportVM.PostId);
+            await _postService.ReportPostAsync(postReportVM.PostId, loggedInUserId.Value);
 
             return RedirectToAction("Index");
         }
