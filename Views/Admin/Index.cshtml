@@ -1,0 +1,69 @@
+﻿@model List<Post>
+@{
+    string defaultUserImage = "~/images/user-profile.svg";
+}
+
+<main id="site__main" class="2xl:ml-[--w-side] xl:ml-[--w-side-sm] p-2.5 h-[calc(100vh-var(--m-top))] mt-[--m-top]">
+    <h1 class="mb-10 text-3xl">Admin Dashboard</h1>
+    <h3 class="mb-3 text-lg text-center font-bold">REPORTED POSTS</h3>
+    <hr />
+    <div class="w-full mt-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 w-[90%] mx-auto">
+               
+            @foreach (Post post in Model)
+            {
+                string displayTime = GlobalHelpers.GetPostedTime(@post.DateCreated);
+
+                <div id="post-@post.Id" class="relative bg-white rounded-xl shadow-sm text-sm font-medium border1">
+                    <div class="flex gap-3 sm:p-4 p-2.5 text-sm font-medium">
+                        <span class="w-9 h-9 flex-shrink-0 rounded-full relative">
+                            <img src="@(post.User.ProfilePictureUrl ?? Url.Content(defaultUserImage))" class="absolute w-full h-full inset-0 rounded-full object-cover shadow-sm" />
+                        </span>
+                        <div class="flex-1">
+                            <h4 class="!text-black">@post.User.FullName</h4>
+                            <div class="text-xs !text-black" title="@post.DateCreated.ToString("M/dd/yyyy hh:mm tt")">@displayTime</div>
+                        </div>
+
+                        <div class="flex -mr-1 space-x-2">
+                            <form asp-controller="Admin" asp-action="RejectReport" asp-route-postId="@post.Id" class="inline">
+                                <button class="button-icon w-8 h-8 text-red-500 hover:text-red-700 hover:bg-sky-100">
+                                    <ion-icon class="text-xl" name="close-outline"></ion-icon>
+                                </button>
+                            </form>
+
+                            <form asp-controller="Admin" asp-action="ApproveReport" asp-route-postId="@post.Id" class="inline">
+                                <button class="button-icon w-8 h-8 text-green-500 hover:text-green-700 hover:bg-sky-100">
+                                    <ion-icon class="text-xl" name="checkmark-outline"></ion-icon>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="mx-auto text-center">
+                        @for (int i = 0; i < post.NrOfReports; i++)
+                        {
+                            <ion-icon class="text-red-600" name="flag"></ion-icon>
+                        }
+                    </div>
+                    @* Post content *@
+                    <a>
+                        <div class="sm:px-4 p-2.5 pt-0 w-full flex-1">
+                            <p class="font-normal !text-black">
+                                @post.Content
+                            </p>
+                        </div>
+                    </a>
+
+                    @if (!string.IsNullOrEmpty(post.ImageUrl))
+                    {
+                        <a>
+                            <div class="relative">
+                                <img src="@post.ImageUrl" class="sm:rounded-lg w-full h-full object-cover rounded-b-xl" />
+                            </div>
+                        </a>
+                    }
+                </div>
+            }
+
+        </div>
+    </div>
+</main>

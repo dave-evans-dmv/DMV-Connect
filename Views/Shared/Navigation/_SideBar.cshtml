@@ -1,4 +1,11 @@
-﻿<div id="site__sidebar" class="fixed top-0 left-0 z-[99] pt-[--m-top] overflow-hidden transition-transform xl:duration-500 max-xl:-translate-x-full:w-full max-xl:-translate-x-full">
+﻿@inject UserManager<User> UserManager;
+
+@{
+    var loggedInUser = await UserManager.GetUserAsync(User);
+    var IsAdmin = User.IsInRole(AppRoles.Admin);
+}
+
+<div id="site__sidebar" class="fixed top-0 left-0 z-[99] pt-[--m-top] overflow-hidden transition-transform xl:duration-500 max-xl:-translate-x-full:w-full max-xl:-translate-x-full">
     <div class="p-2 max-xl:bg-white shadow-sm 2xl:w-72 sm:w-64 w-[80%] h-[calc(100vh-64px)] relative z-30 max-lg:border-r dark:max-xl:!bg-slate-700 dark:border-slate-700 ">
         <div class="pr-4" data-simplebar>
             <nav id="side">
@@ -38,6 +45,16 @@
                         </a>
 
                     </li>
+                    @if (IsAdmin)
+                    {
+                        <li>
+                            <a asp-controller="Admin" asp-action="Index">
+
+                                <div class="!text-white relative pr-4">Admin Dashboard <div class="absolute top-0 right-0 -m-1 bg-red-600 text-white text-xs px-1 rounded-full" id="admin-notifications">0</div></div>
+                            </a>
+
+                        </li>
+                    }
                 </ul>
             </nav>
         </div>
@@ -46,3 +63,23 @@
         class="absolute top-0 left-0 z-20 w-screen h-screen xl:hidden backdrop-blur-sm"
         uk-toggle="target: #site__sidebar ; cls :!-translate-x-0"></div>
 </div>
+@if (IsAdmin)
+{
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            fetch("/Admin/GetCount", {
+                method: 'GET',
+                headers: {
+                    'Content-Type':'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("admin-notifications").innerHTML = data;
+            })
+            .catch(error => {
+                console.error("Error fetching post reports count: ", error);
+            })
+        });
+    </script>
+}
